@@ -1,0 +1,32 @@
+﻿
+@using login.Helpers
+@model IEnumerable<login.Models.Product>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <a href="/Login/Logout">Logout</a>
+    @if (TempData["CartSubmitted"] != null)
+    {
+        <div class="alert alert-success">@TempData["CartSubmitted"]</div>
+    }
+</div>
+
+<div class="products">
+    <h3>Ürünler</h3>
+    <div class="product-list">
+        @foreach (var p in Model)
+        {
+            <div class="product-card">
+                <h4>@p.Name</h4>
+                <div>@TurkishLiraFormatting.Format(p.Price)</div>
+                <form method="post" action="/Cart/AddToCart">
+                    <input type="hidden" name="productId" value="@p.Id" />
+                    <button class="btn btn-primary" type="submit">Sepete Ekle</button>
+                </form>
+            </div>
+        }
+        <div class="cart-actions">
+            <a href="/Cart/Index" class="btn btn-secondary">Sepete Git</a>
+        </div>
+    </div>
+</div>

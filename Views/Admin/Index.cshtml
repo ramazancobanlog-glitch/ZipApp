@@ -1,0 +1,95 @@
+﻿@model IEnumerable<login.Models.Cart>
+
+<h2>Admin Panel</h2>
+<p>Hoşgeldiniz </p>
+<a href="/Login/Logout">Logout</a>
+
+<h3>Onay Bekleyen Sepetler</h3>
+
+@if (!Model.Any())
+{
+	<p>Şu anda onay bekleyen sepet yok.</p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Kullanıcı</th>
+				<th>Ürünler</th>
+				<th>Aksiyon</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var cart in Model)
+			{
+				<tr id="cart-@cart.Id" data-cart-id="@cart.Id">
+					<td>
+						<span class="status-indicator" aria-hidden="true"></span>
+						@cart.Id
+					</td>
+					<td>@cart.Username</td>
+					<td>
+						<ul>
+							@foreach (var it in cart.Items ?? Enumerable.Empty<login.Models.CartItem>())
+							{
+								<li>@it.Product?.Name x @it.Quantity</li>
+							}
+						</ul>
+					</td>
+					<td>
+						<form method="post" action="/Admin/ApproveCart">
+							<input type="hidden" name="id" value="@cart.Id" />
+							<button class="btn btn-success approve-button" type="submit">Onayla</button>
+													
+
+						</form>
+					</td>
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-octagon" viewBox="0 0 16 16">
+  <path d="M4.54.146A.5.5 0 0 1 4.893 0h6.214a.5.5 0 0 1 .353.146l4.394 4.394a.5.5 0 0 1 .146.353v6.214a.5.5 0 0 1-.146.353l-4.394 4.394a.5.5 0 0 1-.353.146H4.893a.5.5 0 0 1-.353-.146L.146 11.46A.5.5 0 0 1 0 11.107V4.893a.5.5 0 0 1 .146-.353zM5.1 1 1 5.1v5.8L5.1 15h5.8l4.1-4.1V5.1L10.9 1z"/>
+  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+</svg>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+
+@section Scripts {
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.11/signalr.min.js" integrity="sha512-/qV7k6z4VQYl5D6L+3hQ7a1uQ5v0mQ0a2v9bXwYV+Vb1K6jK4n2E6ZJ4g5P3h7Cq1r8mJt9z3V8Q2YJ3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script>
+		(function(){
+			const connection = new signalR.HubConnectionBuilder()
+				.withUrl('/hubs/notifications')
+				.withAutomaticReconnect()
+				.build();
+
+			connection.on('CartApproved', function(cartId){
+				const row = document.querySelector(`#cart-${cartId}`);
+				if (!row) return;
+				// Add green visual indicator
+				row.classList.add('approved');
+				const indicator = row.querySelector('.status-indicator');
+				if (indicator) {
+					indicator.style.background = '#28a745';
+					indicator.style.display = 'inline-block';
+					indicator.style.width = '10px';
+					indicator.style.height = '10px';
+					indicator.style.borderRadius = '50%';
+					indicator.style.marginRight = '6px';
+				}
+				// disable approve button and change text
+				const btn = row.querySelector('.approve-button');
+				if (btn) {
+					btn.textContent = 'Onaylandı';
+					btn.disabled = true;
+					btn.classList.remove('btn-success');
+					btn.classList.add('btn-secondary');
+				}
+			});
+
+			connection.start().catch(err => console.error(err));
+		})();
+	</script>
+}

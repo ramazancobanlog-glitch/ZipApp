@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<div class="login-page">
+    <div class="login-card">
+        <h2>Kayıt Ol</h2>
+
+        <form method="post" class="login-form" autocomplete="off">
+            <div class="form-group">
+                <label for="username">Kullanıcı Adı</label>
+                <input id="username" name="username" class="form-control" type="text" required />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Şifre</label>
+                <input id="password" name="password" class="form-control" type="password" required />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" name="email" class="form-control" type="email" required />
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+                <a class="btn btn-link" href="/Login/Index">Giriş Yap</a>
+            </div>
+        </form>
+
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger mt-3">
+                <i class="fas fa-exclamation-circle"></i>
+                @ViewBag.Error
+            </div>
+        }
+
+        @if (ViewBag.Message != null)
+        {
+            <div class="alert alert-success mt-3">
+                <i class="fas fa-check-circle"></i>
+                @ViewBag.Message
+            </div>
+        }
+    </div>
+</div>

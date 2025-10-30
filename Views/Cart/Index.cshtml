@@ -1,0 +1,39 @@
+@model login.Models.Cart
+@using login.Helpers
+
+
+
+
+<h2>Sepetim</h2>
+
+@if (Model == null || Model.Items == null || !Model.Items.Any())
+{
+    <p>Sepetiniz boş.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Ürün</th>
+                <th>Adet</th>
+                <th>Fiyat</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Product?.Name</td>
+                    <td>@item.Quantity</td>
+                    <td>@TurkishLiraFormatting.Format(item.Product?.Price ?? 0)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <form method="post" action="/Cart/ConfirmCart">
+        <input type="hidden" name="cartId" value="@Model.Id" />
+        <button class="btn btn-success" type="submit">Sepeti Onayla (Yönetici Onayına Gönder)</button>
+    </form>
+}
