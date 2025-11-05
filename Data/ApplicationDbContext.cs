@@ -19,6 +19,7 @@ namespace login.Data
                     Id = 1,
                     Username = "admin",
                     Password = "1234",
+                    IsEmailConfirmed = true,
                     IsAdmin = true
                 }
             );
