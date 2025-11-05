@@ -21,6 +21,8 @@ builder.Services.AddSession(options =>
 
 // Configure Email Service
 builder.Services.AddSingleton<EmailService>();
+// Configure Iyzico (Iyzipay) service
+builder.Services.AddSingleton<IyzipayService>();
 
 var app = builder.Build();
 
@@ -38,4 +40,3 @@ app.MapControllerRoute(
 app.MapHub<login.Hubs.NotificationHub>("/hubs/notifications");
 
 app.Run();
-S
