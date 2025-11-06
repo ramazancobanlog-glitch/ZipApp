@@ -4,21 +4,28 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using login.Hubs;
+using login.Services;
+using login.Helpers;
+#nullable enable
 
 namespace login.Controllers
 {
 	public class CartController : Controller
 	{
 		private readonly ApplicationDbContext _context;
-		private readonly login.Services.IyzipayService _iyzipayService;
+		private readonly IyzipayService _iyzipayService;
 		private readonly IHubContext<NotificationHub> _hub;
+		private readonly EmailService _emailService;
+		private readonly ILogger<CartController> _logger;
 
-
-		public CartController(ApplicationDbContext context, login.Services.IyzipayService iyzipayService, IHubContext<NotificationHub> hub)
+		public CartController(ApplicationDbContext context, IyzipayService iyzipayService, 
+			IHubContext<NotificationHub> hub, EmailService emailService, ILogger<CartController> logger)
 		{
 			_context = context;
 			_iyzipayService = iyzipayService;
 			_hub = hub;
+			_emailService = emailService;
+			_logger = logger;
 		}
 
 		// POST: /Cart/AddToCart
@@ -89,6 +96,22 @@ namespace login.Controllers
 			return AddToCart(productId);
 		}
 
+		[HttpPost]
+		public IActionResult RemoveItem(int itemId)
+		{
+			var username = HttpContext.Session.GetString("Username");
+			if (string.IsNullOrEmpty(username))
+				return Json(new { success = false, redirect = Url.Action("Index", "Login") });
+
+			var item = _context.CartItems.Include(i => i.Cart).FirstOrDefault(i => i.Id == itemId && i.Cart.Username == username && i.Cart.Status == CartStatus.Draft);
+			if (item == null)
+				return Json(new { success = false, message = "Ürün bulunamadı veya silinemiyor." });
+
+			_context.CartItems.Remove(item);
+			_context.SaveChanges();
+			return Json(new { success = true });
+		}
+
 		[HttpGet]
 		public IActionResult Index()
 		{
@@ -131,9 +154,92 @@ namespace login.Controllers
 			return View("Payment", checkoutForm);
 		}
 
-		[HttpGet]
-		public IActionResult PaymentResult(string token)
+		[HttpPost]
+		public async Task<IActionResult> SubmitForApprovalAjax(int cartId)
 		{
+			var username = HttpContext.Session.GetString("Username");
+			if (string.IsNullOrEmpty(username))
+			{
+				return Json(new { success = false, redirect = Url.Action("Index", "Login") });
+			}
+
+			var cart = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Id == cartId && c.Username == username);
+			if (cart == null)
+				return Json(new { success = false, message = "Sepet bulunamadı" });
+
+			cart.Status = CartStatus.AwaitingApproval;
+			_context.SaveChanges();
+
+			// notify admin pages via SignalR
+			try
+			{
+				await _hub.Clients.All.SendAsync("NewCartSubmitted", cart.Id);
+			}
+			catch { }
+
+			return Json(new { success = true, message = "Sipariş yöneticinin onayına gönderildi." });
+		}
+
+		private string BuildOrderConfirmationEmail(Cart cart)
+		{
+			decimal total = 0;
+			var itemDetails = new List<string>();
+
+			if (cart.Items != null)
+			{
+				foreach (var item in cart.Items)
+				{
+					if (item.Product != null)
+					{
+						decimal itemTotal = item.Quantity * item.Product.Price;
+						total += itemTotal;
+						itemDetails.Add($"- {item.Product.Name}: {item.Quantity} adet x {TurkishLiraFormatting.Format(item.Product.Price)} = {TurkishLiraFormatting.Format(itemTotal)}");
+					}
+				}	
+			}
+
+			var items = string.Join("\n", itemDetails);
+
+			return $@"
+<html>
+<body style='font-family: Arial, sans-serif;'>
+	<h2>Siparişiniz Onaylandı</h2>
+	<p>Sayın {cart.Username},</p>
+	<p>Siparişiniz başarıyla onaylandı. Sipariş detaylarınız aşağıdadır:</p>
+	
+	<h3>Sipariş Detayları:</h3>
+	<p>Sipariş Numarası: {cart.Id}</p>
+	
+	<div style='margin: 20px 0; padding: 10px; background-color: #f5f5f5;'>
+		{items}
+	</div>
+	
+	<h3>Toplam Tutar: {TurkishLiraFormatting.Format(total)}</h3>
+	
+	<p>Siparişiniz için teşekkür ederiz!</p>
+	<p>Bizi tercih ettiğiniz için teşekkürler.</p>
+</body>
+</html>";
+		}
+
+		[AcceptVerbs("GET", "POST")]
+		[IgnoreAntiforgeryToken]
+		public async Task<IActionResult> PaymentResult(string token)
+		{
+			// Iyzico may POST the token back or redirect with GET; accept both.
+			if (string.IsNullOrEmpty(token))
+			{
+				// try to read from form (POST) or query
+				if (Request.HasFormContentType && Request.Form.ContainsKey("token"))
+				{
+					token = Request.Form["token"].ToString();
+				}
+				else if (Request.Query.ContainsKey("token"))
+				{
+					token = Request.Query["token"].ToString();
+				}
+			}
+
 			if (string.IsNullOrEmpty(token))
 			{
 				TempData["PaymentResult"] = "Ödeme bilgisi alınamadı.";
@@ -146,11 +252,35 @@ namespace login.Controllers
 				// find cart using basket id
 				if (int.TryParse(result.BasketId, out var cartId))
 				{
-					var cart = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Id == cartId);
+					var cart = await _context.Carts
+						.Include("Items.Product")
+						.FirstOrDefaultAsync(c => c.Id == cartId);
+
 					if (cart != null)
 					{
 						cart.Status = CartStatus.Confirmed;
 						_context.SaveChanges();
+
+						// Get user email
+						var user = _context.Users.FirstOrDefault(u => u.Username == cart.Username);
+						if (user?.Email != null)
+						{
+							try
+							{
+								// Build email content
+								var emailBody = BuildOrderConfirmationEmail(cart);
+								await _emailService.SendEmailAsync(
+									user.Email,
+									"Siparişiniz Onaylandı",
+									emailBody
+								);
+							}
+							catch (Exception ex)
+							{
+								// Log but don't fail the transaction
+								_logger.LogError(ex, "Sipariş onay e-postası gönderilemedi: {Message}", ex.Message);
+							}
+						}
 					}
 				}
 

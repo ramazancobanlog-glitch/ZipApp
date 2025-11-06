@@ -2,31 +2,49 @@
 @using login.Helpers
 @model IEnumerable<login.Models.Product>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <a href="/Login/Logout">Logout</a>
-    @if (TempData["CartSubmitted"] != null)
-    {
-        <div class="alert alert-success">@TempData["CartSubmitted"]</div>
-    }
-</div>
 
-<div class="products">
-    <h3>Ürünler</h3>
-    <div class="product-list">
-        @foreach (var p in Model)
-        {
-            <div class="product-card">
-                <h4>@p.Name</h4>
-                <div>@TurkishLiraFormatting.Format(p.Price)</div>
-                <form method="post" action="/Cart/AddToCart">
-                    <input type="hidden" name="productId" value="@p.Id" />
-                    <button class="btn btn-primary" type="submit">Sepete Ekle</button>
-                </form>
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <div class="bg-primary text-white rounded-4 py-4 mb-3 shadow-sm">
+                <h1 class="fw-bold mb-2">Hoşgeldiniz!</h1>
+                <p class="lead mb-0">En iyi ürünleri uygun fiyatlarla keşfedin ve kolayca alışveriş yapın.</p>
             </div>
-        }
-        <div class="cart-actions">
-            <a href="/Cart/Index" class="btn btn-secondary">Sepete Git</a>
+           
+            @if (TempData["CartSubmitted"] != null)
+            {
+                <div class="alert alert-success mt-2">@TempData["CartSubmitted"]</div>
+            }
         </div>
     </div>
+    <div class="row g-4">
+        @foreach (var p in Model)
+        {
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card product-card h-100 shadow-sm rounded-4">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h4 class="card-title fw-bold text-primary">@p.Name</h4>
+                        <div class="mb-3 fs-5">@TurkishLiraFormatting.Format(p.Price)</div>
+                        <form class="ajax-add-to-cart mt-auto" method="post" action="/Cart/AddToCartAjax">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@p.Id" />
+                            <button class="btn btn-success w-100 rounded-3 position-relative" type="submit">
+                                <i class="bi bi-cart-plus me-2"></i>Sepete Ekle
+                                <span class="cart-fly-btn" style="position:absolute;right:12px;top:8px;"></span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="/Cart/Index" class="btn btn-primary btn-lg px-4 rounded-3">
+                <i class="bi bi-cart me-2"></i>Sepete Git
+            </a>
+        </div>
+        
+    </div>
+     <a href="/Login/Logout" class="btn btn-outline-secondary mb-2">Çıkış Yap</a>
 </div>

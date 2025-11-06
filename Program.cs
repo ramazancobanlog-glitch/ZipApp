@@ -23,6 +23,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddSingleton<EmailService>();
 // Configure Iyzico (Iyzipay) service
 builder.Services.AddSingleton<IyzipayService>();
+// Make HttpContext available to ViewComponents and services
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

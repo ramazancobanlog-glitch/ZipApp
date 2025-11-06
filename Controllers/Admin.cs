@@ -22,14 +22,75 @@ namespace login.Controllers
             if (HttpContext.Session.GetString("IsAdmin") != "True")
                 return RedirectToAction("Index", "Login");
 
-            // show carts waiting for approval
-            var pending = _context.Carts
+            // build pending and confirmed lists with item details
+            var pendingCarts = _context.Carts
                 .Where(c => c.Status == Models.CartStatus.AwaitingApproval)
                 .Include(c => c.Items!)
                 .ThenInclude(i => i.Product)
                 .ToList();
 
-            return View(pending);
+            var confirmedCarts = _context.Carts
+                .Where(c => c.Status == Models.CartStatus.Confirmed)
+                .Include(c => c.Items!)
+                .ThenInclude(i => i.Product)
+                .ToList();
+
+            List<Models.AdminCartViewModel> pendingVm = new();
+            List<Models.AdminCartViewModel> confirmedVm = new();
+
+            foreach (var c in pendingCarts)
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Username == c.Username);
+                var vm = new Models.AdminCartViewModel
+                {
+                    Id = c.Id,
+                    Username = c.Username,
+                    Email = user?.Email,
+                    CreatedAt = c.CreatedAt,
+                    Status = c.Status
+                };
+                foreach (var it in c.Items ?? Enumerable.Empty<Models.CartItem>())
+                {
+                    vm.Items.Add(new Models.AdminCartItemViewModel
+                    {
+                        ProductName = it.Product?.Name,
+                        Quantity = it.Quantity,
+                        Price = it.Product?.Price ?? 0
+                    });
+                }
+                pendingVm.Add(vm);
+            }
+
+            foreach (var c in confirmedCarts)
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Username == c.Username);
+                var vm = new Models.AdminCartViewModel
+                {
+                    Id = c.Id,
+                    Username = c.Username,
+                    Email = user?.Email,
+                    CreatedAt = c.CreatedAt,
+                    Status = c.Status
+                };
+                foreach (var it in c.Items ?? Enumerable.Empty<Models.CartItem>())
+                {
+                    vm.Items.Add(new Models.AdminCartItemViewModel
+                    {
+                        ProductName = it.Product?.Name,
+                        Quantity = it.Quantity,
+                        Price = it.Product?.Price ?? 0
+                    });
+                }
+                confirmedVm.Add(vm);
+            }
+
+            var model = new Models.AdminIndexViewModel
+            {
+                Pending = pendingVm,
+                Confirmed = confirmedVm
+            };
+
+            return View(model);
         }
 
         [HttpPost]
