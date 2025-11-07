@@ -45,53 +45,82 @@ namespace login.Controllers
             user.verificationCode = verficationCode;
             user.VerificationCodeExpiresAt = DateTime.Now.AddMinutes(10);
             _context.SaveChanges();
-            await _emailService.SendEmailAsync(
-                user.Email,
-                "Giriş Doğrulama Kodu",
-                $"Giriş yapmak için doğrulama kodunuz: <b>{verficationCode}</b>. Bu kod 10 dakika içinde geçersiz olacaktır."
-            );
-
-            TempData["UserEmail"] = user.Email;
-            return RedirectToAction("VerifyCode");
-
-            HttpContext.Session.SetString("Username", user.Username);
-            HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
-
-            if (user.IsAdmin)
-                return RedirectToAction("Index", "Admin");
-            else
-                return RedirectToAction("Index", "Home");
-        }
-           
-
-         public IActionResult VerifyCode(string email, string code)
-        {
-           var User = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (User == null)
-            {
-                ViewBag.Error = "Kullanıcı Bulunamadı.";
-                return RedirectToAction("login", "Index");
-
-            }
-            if (User.verificationCode == code || User.VerificationCodeExpiresAt < DateTime.Now)
-            {
-                User.verificationCode = null;
-                User.VerificationCodeExpiresAt = null;
-                _context.SaveChanges();
-                if (!string.IsNullOrEmpty(User?.Email))
+                if (string.IsNullOrEmpty(user.Email))
                 {
-                    HttpContext.Session.SetString("UserEmail", User.Email);
-
+                    ViewBag.Error = "Email adresi bulunamadı.";
+                    return View();
                 }
-               // if (!string.IsNullOrEmpty(User?.Username)){
-                    HttpContext.Session.SetString("Username", User.Username);
-          //  }
-                TempData["Success"] = "GirişBaşarılı";
-                return RedirectToAction("verifiy");
+                
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Giriş Doğrulama Kodu",
+                    $"Giriş yapmak için doğrulama kodunuz: <b>{verficationCode}</b>. Bu kod 10 dakika içinde geçersiz olacaktır."
+                );
 
+                TempData["UserEmail"] = user.Email;
+                return RedirectToAction("VerifyCode");
+        }
+
+        [HttpGet]
+        public IActionResult VerifyCode()
+        {
+            var email = TempData["UserEmail"]?.ToString();
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Index");
             }
-            TempData["Error"] = "Geçersiz Kod veya Süresi Dolmuş";
-            return View();
+            
+            // TempData'yı korumak için yeniden atıyoruz
+            TempData["UserEmail"] = email;
+            return View("verify");
+        }
+
+        [HttpPost]
+        public IActionResult VerifyCode(string email, string code)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            if (user == null)
+            {
+                TempData["Error"] = "Kullanıcı bulunamadı.";
+                return RedirectToAction("Index");
+            }
+
+            // Kodun süresi dolmuş mu kontrol et
+            if (user.VerificationCodeExpiresAt < DateTime.Now)
+            {
+                TempData["Error"] = "Doğrulama kodunun süresi dolmuş.";
+                return RedirectToAction("Index");
+            }
+
+            // Kod doğru mu kontrol et
+            if (user.verificationCode == code)
+            {
+                // Kodu temizle
+                user.verificationCode = null;
+                user.VerificationCodeExpiresAt = null;
+                _context.SaveChanges();
+
+                // Session'ları ayarla
+                if (!string.IsNullOrEmpty(user.Email))
+                    HttpContext.Session.SetString("UserEmail", user.Email);
+                if (!string.IsNullOrEmpty(user.Username))
+                    HttpContext.Session.SetString("Username", user.Username);
+                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
+
+                // Admin ise admin paneline, değilse ana sayfaya yönlendir
+                if (user.IsAdmin)
+                {
+                    return RedirectToAction("Index", "Admin");
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
+            TempData["Error"] = "Geçersiz doğrulama kodu.";
+            TempData["UserEmail"] = email; // Email'i geri gönder
+            return View("verify");
             
 
         }
@@ -179,3 +208,5 @@ namespace login.Controllers
         }
     }
 }
+        
+    
