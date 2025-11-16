@@ -4,47 +4,86 @@
 
 
 <div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-12 text-center">
-            <div class="bg-primary text-white rounded-4 py-4 mb-3 shadow-sm">
-                <h1 class="fw-bold mb-2">Hoşgeldiniz!</h1>
-                <p class="lead mb-0">En iyi ürünleri uygun fiyatlarla keşfedin ve kolayca alışveriş yapın.</p>
+    <!-- Hero -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-7">
+            <div class="card-like p-4">
+                <h1 class="fw-bold" style="color:#FF6B35; font-size:2rem;">Günlük Fırsatlar ve Hemen Teslim</h1>
+                <p class="muted mb-3">Binlerce kategori, güvenli ödeme ve hızlı teslimat — Hepsiburada tarzı deneyimi ZipApp ile yaşayın.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="#products" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
+                </div>
             </div>
-           
-            @if (TempData["CartSubmitted"] != null)
-            {
-                <div class="alert alert-success mt-2">@TempData["CartSubmitted"]</div>
-            }
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+            <img src="~/img/mouse.jpg" alt="hero" class="img-fluid" style="max-height:220px;border-radius:12px;box-shadow:0 8px 28px rgba(11,43,90,0.08);" />
+        </div>
+        <!-- mobile hero image -->
+        <div class="col-12 d-lg-none text-center mb-3">
+            <img src="~/img/mouse.jpg" alt="hero-mobile" class="img-fluid" style="max-height:160px;border-radius:10px;box-shadow:0 6px 20px rgba(11,43,90,0.06);" />
         </div>
     </div>
-    <div class="row g-4">
-        @foreach (var p in Model)
-        {
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <div class="card product-card h-100 shadow-sm rounded-4">
-                    <div class="card-body d-flex flex-column justify-content-between">
-                        <h4 class="card-title fw-bold text-primary">@p.Name</h4>
-                        <div class="mb-3 fs-5">@TurkishLiraFormatting.Format(p.Price)</div>
-                        <form class="ajax-add-to-cart mt-auto" method="post" action="/Cart/AddToCartAjax">
+
+    <!-- Categories chips -->
+    <div id="categories" class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge bg-white border text-muted py-2 px-3">Elektronik</span>
+                <span class="badge bg-white border text-muted py-2 px-3">Bilgisayar</span>
+                <span class="badge bg-white border text-muted py-2 px-3">Ev & Yaşam</span>
+                <span class="badge bg-white border text-muted py-2 px-3">Moda</span>
+                <span class="badge bg-white border text-muted py-2 px-3">Kozmetik</span>
+                <span class="badge bg-white border text-muted py-2 px-3">Süpermarket</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    @if (TempData["CartSubmitted"] != null)
+    {
+        <div class="alert alert-success">@TempData["CartSubmitted"]</div>
+    }
+
+    <!-- Products -->
+    <section id="products" class="mb-4">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <h3 class="fw-bold mb-0">Öne Çıkan Ürünler</h3>
+                <small class="muted">Popüler ürünler ve günlük indirimler</small>
+            </div>
+            <div><a href="#" class="muted">Tümünü Gör →</a></div>
+        </div>
+
+        <div class="product-list">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var p in Model)
+                {
+                    <div class="product-card position-relative">
+                        <div style="height:160px;overflow:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fbfdff;margin-bottom:0.75rem;">
+                            <img src="~/img/mouse.jpg" alt="@p.Name" style="max-height:140px;max-width:100%;object-fit:contain;" />
+                        </div>
+                        <h4 class="mb-1">@p.Name</h4>
+                        <div class="mb-2">@TurkishLiraFormatting.Format(p.Price)</div>
+                        <div class="mb-3 muted small">Stokta var • Ücretsiz kargo</div>
+                        <form class="ajax-add-to-cart" method="post" action="/Cart/AddToCartAjax">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="productId" value="@p.Id" />
-                            <button class="btn btn-success w-100 rounded-3 position-relative" type="submit">
+                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center" type="submit" style="border-radius:10px;padding:0.6rem 0.8rem;">
                                 <i class="bi bi-cart-plus me-2"></i>Sepete Ekle
-                                <span class="cart-fly-btn" style="position:absolute;right:12px;top:8px;"></span>
                             </button>
                         </form>
                     </div>
-                </div>
-            </div>
-        }
-    </div>
-    <div class="row mt-4">
-        <div class="col-12 text-center">
-            <a href="/Cart/Index" class="btn btn-primary btn-lg px-4 rounded-3">
-                <i class="bi bi-cart me-2"></i>Sepete Git
-            </a>
+                }
+            }
+            else
+            {
+                <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
+            }
         </div>
-        
-    </div>
-     <a href="/Login/Logout" class="btn btn-outline-secondary mb-2">Çıkış Yap</a>
+    </section>
+
+
 </div>
+
+<div id="ajax-alert" style="position:fixed;top:16px;right:16px;z-index:1060;"></div>

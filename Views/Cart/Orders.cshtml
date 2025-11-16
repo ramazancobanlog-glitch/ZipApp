@@ -1,0 +1,67 @@
+@model IEnumerable<login.Models.Cart>
+@using login.Helpers
+
+<div class="container mt-4">
+    <h2>Siparişlerim</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">Henüz onaylanmış siparişiniz yok.</div>
+    }
+    else
+    {
+        foreach (var cart in Model)
+        {
+            var total = 0m;
+            if (cart.Items != null)
+            {
+                foreach (var it in cart.Items)
+                {
+                    total += it.Quantity * (it.Product?.Price ?? 0m);
+                }
+            }
+
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Sipariş #@cart.Id</strong>
+                        <div class="text-muted" style="font-size:0.9rem">@cart.CreatedAt.ToString("g")</div>
+                    </div>
+                    <div>
+                        <span class="badge bg-secondary">@cart.Status</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0">
+                        <thead>
+                            <tr>
+                                <th>Ürün</th>
+                                <th class="text-center">Adet</th>
+                                <th class="text-end">Birim Fiyat</th>
+                                <th class="text-end">Tutar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in cart.Items ?? Enumerable.Empty<login.Models.CartItem>())
+                            {
+                                var lineTotal = item.Quantity * (item.Product?.Price ?? 0m);
+                                <tr>
+                                    <td>@item.Product?.Name</td>
+                                    <td class="text-center">@item.Quantity</td>
+                                    <td class="text-end">@TurkishLiraFormatting.Format(item.Product?.Price ?? 0m)</td>
+                                    <td class="text-end">@TurkishLiraFormatting.Format(lineTotal)</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Toplam:</th>
+                                <th class="text-end">@TurkishLiraFormatting.Format(total)</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>

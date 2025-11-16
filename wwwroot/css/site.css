@@ -32,7 +32,7 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg,#f6f8fb,#eef4ff); color: #0b1a2b; margin:0 0 60px}
-.main-container{max-width:var(--max-width)}
+.main-container{max-width:var(--max-width); width:100%; margin:0 auto; padding:0 1rem;}
 
 /* navbar */
 .navbar { background: linear-gradient(90deg, #ffffff 0%, #f8fbff 100%); border-bottom: 1px solid #e6eefc}
@@ -55,13 +55,22 @@ body{font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvet
 .product-card h4{color:#0b2b5a;margin-bottom:0.25rem}
 .product-card div{font-weight:600;color:var(--accent)}
 
+/* product card improvements */
+.product-card{transition:transform .22s ease, box-shadow .22s ease}
+.product-card:hover{transform:translateY(-8px);box-shadow:0 16px 40px rgba(11,43,90,0.08)}
+.product-card img{transition:transform .28s ease}
+.product-card:hover img{transform:scale(1.05)}
+
 /* buttons */
 .btn{border-radius:10px;padding:0.5rem 0.85rem}
-.btn-primary{background:linear-gradient(180deg,var(--accent),#3b7be6);color:white}
+.btn-primary{background:linear-gradient(180deg,#FF6B35,#FF8C5A);color:white;border:none}
 .btn-secondary{background:#f1f6ff;color:var(--card)}
 
+/* make outline secondary softer */
+.btn-outline-secondary{border-color:#e8eefc;color:var(--card);background:transparent}
+
 /* cart badge & animation */
-.badge{position:absolute;top:-8px;right:-8px;background:#ff5c7c;color:white;font-weight:700;padding:0.25rem 0.45rem;border-radius:999px}
+.badge{position:absolute;top:-8px;right:-8px;background:#FF6B35;color:white;font-weight:700;padding:0.25rem 0.45rem;border-radius:999px}
 .badge.pulse{animation:badge-pulse .9s ease}
 @keyframes badge-pulse{0%{transform:scale(1)}50%{transform:scale(1.45)}100%{transform:scale(1)}}
 .cart-fly{position:absolute;right:-26px;top:-8px;color:var(--card);font-weight:800;opacity:0;transform:translateY(-6px);transition:all .18s}
@@ -96,4 +105,10 @@ tr.approved td{background:#e9f8ee}
 
 /* Login tweaks */
 .login-card { border: 1px solid #eef4ff; }
+
+/* AJAX alert container for toast-like messages */
+#ajax-alert .alert { min-width: 260px; box-shadow: 0 8px 28px rgba(11,43,90,0.08); border-radius: 8px; }
+
+/* responsive tweaks for product grid */
+.product-list{gap:1rem}
 

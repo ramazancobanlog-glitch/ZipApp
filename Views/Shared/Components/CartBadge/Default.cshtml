@@ -1,8 +1,55 @@
 @model int
-<a class="btn btn-link position-relative me-2 cart-link" href="/Cart/Index" title="Sepetim">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-cart" viewBox="0 0 16 16">
-      <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 6H14.5a.5.5 0 0 1 .49.598l-1.5 6A.5.5 0 0 1 13 13H4a.5.5 0 0 1-.491-.408L1.01 2H.5a.5.5 0 0 1-.5-.5z"/>
-    </svg>
-    <span id="cart-badge" class="badge">@Model</span>
+
+<style>
+    .cart-link {
+        position: relative;
+        text-decoration: none;
+        color: white;
+        padding: 8px 12px;
+        transition: all 0.3s ease;
+    }
+
+    .cart-link:hover {
+        color: #ffd700;
+        transform: scale(1.15);
+    }
+
+    .cart-link svg {
+        width: 28px;
+        height: 28px;
+        transition: all 0.3s ease;
+    }
+
+    #cart-badge {
+        position: absolute;
+        top: -8px;
+        right: -5px;
+        background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 800;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        border: 2px solid white;
+        padding: 0;
+    }
+
+    .cart-fly {
+        position: fixed;
+        pointer-events: none;
+    }
+</style>
+
+<a class="btn btn-link position-relative cart-link" href="/Cart/Index" title="Sepete Git (@Model ürün)">
+    <i class="bi bi-bag"></i>
+    @if (Model > 0)
+    {
+        <span id="cart-badge" class="badge">@Model</span>
+    }
     <span id="cart-fly" class="cart-fly"></span>
 </a>

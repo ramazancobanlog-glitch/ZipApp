@@ -227,6 +227,7 @@ namespace login.Controllers
 		public async Task<IActionResult> PaymentResult(string token)
 		{
 			// Iyzico may POST the token back or redirect with GET; accept both.
+			// If no token, check if we have TempData message (from redirect after payment)
 			if (string.IsNullOrEmpty(token))
 			{
 				// try to read from form (POST) or query
@@ -240,10 +241,11 @@ namespace login.Controllers
 				}
 			}
 
+			// If still no token, just show the page with TempData message (handles redirect case)
 			if (string.IsNullOrEmpty(token))
 			{
-				TempData["PaymentResult"] = "Ödeme bilgisi alınamadı.";
-				return RedirectToAction("Index", "Home");
+				// TempData will be set by previous redirect; just render the view
+				return View();
 			}
 
 			var result = _iyzipayService.RetrieveCheckoutForm(token);
@@ -285,13 +287,30 @@ namespace login.Controllers
 				}
 
 				TempData["PaymentResult"] = "Ödeme başarılı, siparişiniz onaylandı.";
+				return RedirectToAction("PaymentResult", "Cart");
 			}
 			else
 			{
 				TempData["PaymentResult"] = "Ödeme başarısız veya iptal edildi.";
+				return RedirectToAction("PaymentResult", "Cart");
 			}
+		}
 
-			return RedirectToAction("Index", "Home");
+		[HttpGet]
+		public IActionResult Orders()
+		{
+			var username = HttpContext.Session.GetString("Username");
+			if (string.IsNullOrEmpty(username))
+				return RedirectToAction("Index", "Login");
+
+			var orders = _context.Carts
+				.Include(c => c.Items!)
+				.ThenInclude(i => i.Product)
+				.Where(c => c.Username == username && c.Status != CartStatus.Draft)
+				.OrderByDescending(c => c.CreatedAt)
+				.ToList();
+
+			return View(orders);
 		}
 	}
 }
