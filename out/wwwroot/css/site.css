@@ -1,0 +1,119 @@
+/* Sepete Ekle butonu animasyonlu rakam */
+.cart-fly-btn {
+  position: absolute;
+  right: 12px;
+  top: 8px;
+  background: transparent;
+  color: #0b2b5a;
+  font-weight: 700;
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: all 0.2s ease;
+}
+.cart-fly-btn.show {
+  opacity: 1;
+  transform: translateY(-20px);
+}
+:root{
+  --bg-1: #0f172a; /* dark navy */
+  --bg-2: #071133;
+  --card: #0b2b5a;
+  --accent: #5b8cff;
+  --accent-2: #6bd4c1;
+  --muted: #6b7280;
+  --surface: #0f172a0f;
+  --glass: rgba(255,255,255,0.04);
+  --radius: 12px;
+  --max-width: 1200px;
+}
+
+/* global reset and typography */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: linear-gradient(180deg,#f6f8fb,#eef4ff); color: #0b1a2b; margin:0 0 60px}
+.main-container{max-width:var(--max-width); width:100%; margin:0 auto; padding:0 1rem;}
+
+/* navbar */
+.navbar { background: linear-gradient(90deg, #ffffff 0%, #f8fbff 100%); border-bottom: 1px solid #e6eefc}
+.navbar-brand{font-weight:700; color:var(--card); font-size:1.15rem}
+.header-actions .cart-link{color:var(--card)}
+
+/* cards */
+.card-like{background:white; border-radius:var(--radius); box-shadow: 0 6px 24px rgba(15,23,42,0.06); padding:1rem}
+
+/* Login page */
+.login-page{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 80px);padding:2rem}
+.login-card{width:100%;max-width:420px;background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:14px;padding:2rem;border:1px solid #eef6ff;box-shadow:0 10px 30px rgba(11,43,90,0.06)}
+.login-card h2{font-weight:700;color:var(--card);text-align:center}
+.login-card .form-control{border-radius:8px;border:1px solid #e6eefc;padding:0.65rem}
+.form-actions .btn-primary{background:linear-gradient(180deg,var(--accent),#3b7be6);border:none}
+
+/* product grid */
+.product-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem;padding:1rem}
+.product-card{background:linear-gradient(180deg,#ffffff,#fbfdff);border-radius:12px;padding:1rem;text-align:center;border:1px solid #eef6ff}
+.product-card h4{color:#0b2b5a;margin-bottom:0.25rem}
+.product-card div{font-weight:600;color:var(--accent)}
+
+/* product card improvements */
+.product-card{transition:transform .22s ease, box-shadow .22s ease}
+.product-card:hover{transform:translateY(-8px);box-shadow:0 16px 40px rgba(11,43,90,0.08)}
+.product-card img{transition:transform .28s ease}
+.product-card:hover img{transform:scale(1.05)}
+
+/* buttons */
+.btn{border-radius:10px;padding:0.5rem 0.85rem}
+.btn-primary{background:linear-gradient(180deg,#FF6B35,#FF8C5A);color:white;border:none}
+.btn-secondary{background:#f1f6ff;color:var(--card)}
+
+/* make outline secondary softer */
+.btn-outline-secondary{border-color:#e8eefc;color:var(--card);background:transparent}
+
+/* cart badge & animation */
+.badge{position:absolute;top:-8px;right:-8px;background:#FF6B35;color:white;font-weight:700;padding:0.25rem 0.45rem;border-radius:999px}
+.badge.pulse{animation:badge-pulse .9s ease}
+@keyframes badge-pulse{0%{transform:scale(1)}50%{transform:scale(1.45)}100%{transform:scale(1)}}
+.cart-fly{position:absolute;right:-26px;top:-8px;color:var(--card);font-weight:800;opacity:0;transform:translateY(-6px);transition:all .18s}
+.cart-fly.show{opacity:1;transform:translateY(-20px)}
+
+/* admin table */
+.table thead th{background:linear-gradient(90deg,#fbfdff,#f1f6ff);border-bottom:0;color:var(--card)}
+tr.approved td{background:#e9f8ee}
+.approve-button{border-radius:8px;padding:0.4rem 0.7rem}
+
+/* small utilities */
+.muted{color:var(--muted)}
+
+
+/* Cart icon and badge */
+.cart-link { color: #0b2b5a; position: relative; display: inline-flex; align-items: center; }
+.cart-link svg { opacity: 0.85; }
+.badge { font-size: 0.7rem; padding: 0.25rem 0.45rem; border-radius: 999px; top: -6px; right: -6px; }
+.badge.pulse { animation: badge-pulse 0.9s ease; }
+@keyframes badge-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.45); } 100% { transform: scale(1); } }
+
+/* little fly number next to cart */
+.cart-fly { position: absolute; right: -28px; top: -8px; background: transparent; color: #0b2b5a; font-weight: 700; display: inline-block; opacity: 0; transform: translateY(-6px); transition: all 0.2s ease; }
+.cart-fly.show { opacity: 1; transform: translateY(-20px); }
+
+/* Admin table prettier */
+.table thead { background: linear-gradient(90deg,#f6f9ff,#eef5ff); }
+.table tbody tr { transition: background .2s; }
+.approve-button { border-radius: 6px; padding: 0.4rem 0.7rem; }
+.btn-success { background: linear-gradient(180deg,#2fa360,#0e9d58); border: none; color: white; }
+.btn-secondary { background: #9aaecf; color: white; }
+
+/* Login tweaks */
+.login-card { border: 1px solid #eef4ff; }
+
+/* AJAX alert container for toast-like messages */
+#ajax-alert .alert { min-width: 260px; box-shadow: 0 8px 28px rgba(11,43,90,0.08); border-radius: 8px; }
+
+/* responsive tweaks for product grid */
+.product-list{gap:1rem}
+
+/* category chips */
+.category-chip{cursor:pointer;border-radius:999px;transition:all .18s ease}
+.category-chip.active{background:#FF6B35;color:white;border-color:#ff6b35}
+
+

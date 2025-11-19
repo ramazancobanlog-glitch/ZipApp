@@ -1,0 +1,17 @@
+# render.yaml blueprint: create a web service using the Dockerfile in repo root
+# When using this blueprint, Render creates the service automatically.
+# Edit the settings below as needed.
+
+services:
+  - type: web
+    name: zipapp
+    env: docker
+    plan: free
+    repo: https://github.com/ramazancobanlog-glitch/ZipApp
+    branch: main
+    dockerfilePath: ./Dockerfile
+    buildCommand: ""
+    startCommand: ""
+    envVars:
+      - key: PORT
+        value: "10000"

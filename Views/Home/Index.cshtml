@@ -1,7 +1,4 @@
-﻿
-@using login.Helpers
-@model login.Models.HomeIndexViewModel
-
+﻿@using login.Helpers
 
 <div class="container py-4">
     <!-- Hero -->
@@ -14,7 +11,321 @@
                     <a href="#products" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
                 </div>
             </div>
-<<<<<<< HEAD
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+            <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="~/img/mouse.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="~/img/klavye.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="~/img/mouse.jpg" class="d-block w-100" alt="...">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+        <!-- mobile hero image -->
+        <div class="col-12 d-lg-none text-center mb-3">
+            <img src="~/img/mouse.jpg" alt="hero-mobile" class="img-fluid" style="max-height:160px;border-radius:10px;box-shadow:0 6px 20px rgba(11,43,90,0.06);" />
+        </div>
+    </div>
+
+    <!-- Categories chips -->
+    <div id="categories" class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge bg-white border text-muted py-2 px-3 category-chip active" data-id="0">Tümü</span>
+                @if (Model.Categories != null)
+                {
+                    foreach (var c in Model.Categories)
+                    {
+                        <span class="badge bg-white border text-muted py-2 px-3 category-chip" data-id="@c.Id">@c.Name</span>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications -->
+    @if (TempData["CartSubmitted"] != null)
+    {
+        <div class="alert alert-success">@TempData["CartSubmitted"]</div>
+    }
+
+    <!-- Products -->
+    <section id="products" class="mb-4">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <h3 class="fw-bold mb-0">Öne Çıkan Ürünler</h3>
+                <small class="muted">Popüler ürünler ve günlük indirimler</small>
+            </div>
+            <div><a href="#" class="muted">Tümünü Gör →</a></div>
+        </div>
+
+        <div class="product-list">
+            @if (Model.Products != null && Model.Products.Any())
+            {
+                foreach (var p in Model.Products)
+                {
+                    <div class="product-card position-relative" data-category-id="@p.CategoryId">
+                        <div style="height:160px;overflow:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fbfdff;margin-bottom:0.75rem;">
+                            <img src="@Url.Content(p.ImageUrl ?? "~/img/mouse.jpg")" alt="@p.Name" style="max-height:140px;max-width:100%;object-fit:contain;" />
+                        </div>
+                        <h4 class="mb-1">@p.Name</h4>
+                        <small class="muted">@p.Category?.Name</small>
+                        <div class="mb-2">@TurkishLiraFormatting.Format(p.Price)</div>
+                        <div class="mb-3 muted small">@p.Category?.Name • Stokta var • Ücretsiz kargo</div>
+                        <form class="ajax-add-to-cart" method="post" action="/Cart/AddToCartAjax">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@p.Id" />
+                            <input type="hidden" name="categoryId" value="@p.CategoryId" />
+                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center" type="submit" style="border-radius:10px;padding:0.6rem 0.8rem;">
+                               <i class="bi bi-bag"></i>Sepete Ekle
+                            </button>
+                        </form> 
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
+            }
+        </div>
+    </section>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="/Cart/Index" class="btn btn-primary btn-lg px-4 rounded-3">
+                <i class="bi bi-cart me-2"></i>Sepete Git
+            </a>
+        </div>
+    </div>
+
+    <a href="/Login/Logout" class="btn btn-outline-secondary mb-2">Çıkış Yap</a>
+</div>
+
+<div id="ajax-alert" style="position:fixed;top:16px;right:16px;z-index:1060;"></div>
+<div class="container py-4">
+    <!-- Hero -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-7">
+            <div class="card-like p-4">
+                <h1 class="fw-bold" style="color:#FF6B35; font-size:2rem;">Günlük Fırsatlar ve Hemen Teslim</h1>
+                <p class="muted mb-3">Binlerce kategori, güvenli ödeme ve hızlı teslimat — Hepsiburada tarzı deneyimi ZipApp ile yaşayın.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="#products" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block">
+            <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="~/img/mouse.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="~/img/klavye.jpg" class="d-block w-100" alt="...">
+                    </div>
+                    <div class="carousel-item">
+                        <img src="~/img/mouse.jpg" class="d-block w-100" alt="...">
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleAutoplaying" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+        <!-- mobile hero image -->
+            <div class="row align-items-center mb-4">
+                <div class="col-lg-7">
+                    <div class="card-like p-4">
+                        <h1 class="fw-bold" style="color:#FF6B35; font-size:2rem;">Günlük Fırsatlar ve Hemen Teslim</h1>
+                        <p class="muted mb-3">Binlerce kategori, güvenli ödeme ve hızlı teslimat — Hepsiburada tarzı deneyimi ZipApp ile yaşayın.</p>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="#products" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 text-center d-none d-lg-block">
+                    <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="~/img/mouse.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="~/img/klavye.jpg" class="d-block w-100" alt="...">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="~/img/mouse.jpg" class="d-block w-100" alt="...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 d-lg-none text-center mb-3">
+                    <img src="~/img/mouse.jpg" alt="hero-mobile" class="img-fluid" style="max-height:160px;border-radius:10px;box-shadow:0 6px 20px rgba(11,43,90,0.06);" />
+                </div>
+            </div>
+
+            <div id="categories" class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge bg-white border text-muted py-2 px-3 category-chip active" data-id="0">Tümü</span>
+                        @if (Model.Categories != null)
+                        {
+                            foreach (var c in Model.Categories)
+                            {
+                                <span class="badge bg-white border text-muted py-2 px-3 category-chip" data-id="@c.Id">@c.Name</span>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            @if (TempData["CartSubmitted"] != null)
+            {
+                <div class="alert alert-success">@TempData["CartSubmitted"]</div>
+            }
+
+            <section id="products" class="mb-4">
+                <div class="d-flex justify-content-between align-items-end mb-3">
+                    <div>
+                        <h3 class="fw-bold mb-0">Öne Çıkan Ürünler</h3>
+                        <small class="muted">Popüler ürünler ve günlük indirimler</small>
+                    </div>
+                    <div><a href="#" class="muted">Tümünü Gör →</a></div>
+                </div>
+
+                <div class="product-list">
+                    @if (Model.Products != null && Model.Products.Any())
+                    {
+                        foreach (var p in Model.Products)
+                        {
+                            <div class="product-card position-relative" data-category-id="@p.CategoryId">
+                                <div style="height:160px;overflow:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fbfdff;margin-bottom:0.75rem;">
+                                    <img src="@Url.Content(p.ImageUrl ?? "~/img/mouse.jpg")" alt="@p.Name" style="max-height:140px;max-width:100%;object-fit:contain;" />
+                                </div>
+                                <h4 class="mb-1">@p.Name</h4>
+                                <small class="muted">@p.Category?.Name</small>
+                                <div class="mb-2">@TurkishLiraFormatting.Format(p.Price)</div>
+                                <div class="mb-3 muted small">@p.Category?.Name • Stokta var • Ücretsiz kargo</div>
+                                <form class="ajax-add-to-cart" method="post" action="/Cart/AddToCartAjax">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Id" />
+                                    <input type="hidden" name="categoryId" value="@p.CategoryId" />
+                                    <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center" type="submit" style="border-radius:10px;padding:0.6rem 0.8rem;">
+                                       <i class="bi bi-bag"></i>Sepete Ekle
+                                    </button>
+                                </form> 
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
+                    }
+                </div>
+            </section>
+
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/Cart/Index" class="btn btn-primary btn-lg px-4 rounded-3">
+                        <i class="bi bi-cart me-2"></i>Sepete Git
+                    </a>
+                </div>
+            </div>
+
+            <a href="/Login/Logout" class="btn btn-outline-secondary mb-2">Çıkış Yap</a>
+        </div>
+
+        <div id="ajax-alert" style="position:fixed;top:16px;right:16px;z-index:1060;"></div>
+                    </a>
+                </div>
+            </div>
+    
+            <a href="/Login/Logout" class="btn btn-outline-secondary mb-2">Çıkış Yap</a>
+        </div>
+    
+        <div id="ajax-alert" style="position:fixed;top:16px;right:16px;z-index:1060;"></div>
+    <!-- Products -->
+    <section id="products" class="mb-4">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <h3 class="fw-bold mb-0">Öne Çıkan Ürünler</h3>
+                <small class="muted">Popüler ürünler ve günlük indirimler</small>
+            </div>
+            <div><a href="#" class="muted">Tümünü Gör →</a></div>
+        </div>
+
+        <div class="product-list">
+            @if (Model.Products != null && Model.Products.Any())
+            {
+                foreach (var p in Model.Products)
+                {
+                    <div class="product-card position-relative" data-category-id="@p.CategoryId">
+                        <div style="height:160px;overflow:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fbfdff;margin-bottom:0.75rem;">
+                            <img src="@Url.Content(p.ImageUrl ?? "~/img/mouse.jpg")" alt="@p.Name" style="max-height:140px;max-width:100%;object-fit:contain;" />
+                        </div>
+                        <h4 class="mb-1">@p.Name</h4>
+                        <small class="muted">@p.Category?.Name</small>
+                        <div class="mb-2">@TurkishLiraFormatting.Format(p.Price)</div>
+                        <div class="mb-3 muted small">@p.Category?.Name • Stokta var • Ücretsiz kargo</div>
+                        <form class="ajax-add-to-cart" method="post" action="/Cart/AddToCartAjax">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="productId" value="@p.Id" />
+                            <input type="hidden" name="categoryId" value="@p.CategoryId" />
+                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center" type="submit" style="border-radius:10px;padding:0.6rem 0.8rem;">
+                               <i class="bi bi-bag"></i>Sepete Ekle
+                            </button>
+                        </form> 
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
+            }
+        </div>
+    </section>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <a href="/Cart/Index" class="btn btn-primary btn-lg px-4 rounded-3">
+                <i class="bi bi-cart me-2"></i>Sepete Git
+            </a>
+        </div>
+    </div>
+
+    <a href="/Login/Logout" class="btn btn-outline-secondary mb-2">Çıkış Yap</a>
+</div>
+
+<div id="ajax-alert" style="position:fixed;top:16px;right:16px;z-index:1060;"></div>
+    <!-- Hero -->
+    <div class="row align-items-center mb-4">
+        <div class="col-lg-7">
+            <div class="card-like p-4">
+                <h1 class="fw-bold" style="color:#FF6B35; font-size:2rem;">Günlük Fırsatlar ve Hemen Teslim</h1>
+                <p class="muted mb-3">Binlerce kategori, güvenli ödeme ve hızlı teslimat — Hepsiburada tarzı deneyimi ZipApp ile yaşayın.</p>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="#products" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
+                </div>
+            </div>
+ 
         </div>
         <div class="col-lg-5 text-center d-none d-lg-block">
 <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
@@ -105,78 +416,4 @@
                 <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
             }
         </div>
-=======
-        </div>
-        <div class="col-lg-5 text-center d-none d-lg-block">
-            <img src="~/img/mouse.jpg" alt="hero" class="img-fluid" style="max-height:220px;border-radius:12px;box-shadow:0 8px 28px rgba(11,43,90,0.08);" />
-        </div>
-        <!-- mobile hero image -->
-        <div class="col-12 d-lg-none text-center mb-3">
-            <img src="~/img/mouse.jpg" alt="hero-mobile" class="img-fluid" style="max-height:160px;border-radius:10px;box-shadow:0 6px 20px rgba(11,43,90,0.06);" />
-        </div>
-    </div>
-
-    <!-- Categories chips -->
-    <div id="categories" class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex flex-wrap gap-2">
-                <span class="badge bg-white border text-muted py-2 px-3">Elektronik</span>
-                <span class="badge bg-white border text-muted py-2 px-3">Bilgisayar</span>
-                <span class="badge bg-white border text-muted py-2 px-3">Ev & Yaşam</span>
-                <span class="badge bg-white border text-muted py-2 px-3">Moda</span>
-                <span class="badge bg-white border text-muted py-2 px-3">Kozmetik</span>
-                <span class="badge bg-white border text-muted py-2 px-3">Süpermarket</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notifications -->
-    @if (TempData["CartSubmitted"] != null)
-    {
-        <div class="alert alert-success">@TempData["CartSubmitted"]</div>
-    }
-
-    <!-- Products -->
-    <section id="products" class="mb-4">
-        <div class="d-flex justify-content-between align-items-end mb-3">
-            <div>
-                <h3 class="fw-bold mb-0">Öne Çıkan Ürünler</h3>
-                <small class="muted">Popüler ürünler ve günlük indirimler</small>
-            </div>
-            <div><a href="#" class="muted">Tümünü Gör →</a></div>
-        </div>
-
-        <div class="product-list">
-            @if (Model != null && Model.Any())
-            {
-                foreach (var p in Model)
-                {
-                    <div class="product-card position-relative">
-                        <div style="height:160px;overflow:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fbfdff;margin-bottom:0.75rem;">
-                            <img src="~/img/mouse.jpg" alt="@p.Name" style="max-height:140px;max-width:100%;object-fit:contain;" />
-                        </div>
-                        <h4 class="mb-1">@p.Name</h4>
-                        <div class="mb-2">@TurkishLiraFormatting.Format(p.Price)</div>
-                        <div class="mb-3 muted small">Stokta var • Ücretsiz kargo</div>
-                        <form class="ajax-add-to-cart" method="post" action="/Cart/AddToCartAjax">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="productId" value="@p.Id" />
-                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center" type="submit" style="border-radius:10px;padding:0.6rem 0.8rem;">
-                                <i class="bi bi-cart-plus me-2"></i>Sepete Ekle
-                            </button>
-                        </form>
-                    </div>
-                }
-            }
-            else
-            {
-                <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
-            }
-        </div>
->>>>>>> 5590c644046da458a1c17984c8a0dd98110d122e
-    </section>
-
-
-</div>
-
-<div id="ajax-alert" style="position:fixed;top:16px;right:16px;z-index:1060;"></div>
+    
