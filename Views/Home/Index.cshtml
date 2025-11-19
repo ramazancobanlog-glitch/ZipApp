@@ -42,21 +42,7 @@
         </div>
     </div>
 
-    <!-- Categories chips -->
-    <div id="categories" class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex flex-wrap gap-2">
-                <span class="badge bg-white border text-muted py-2 px-3 category-chip active" data-id="0">Tümü</span>
-                @if (Model.Categories != null)
-                {
-                    foreach (var c in Model.Categories)
-                    {
-                        <span class="badge bg-white border text-muted py-2 px-3 category-chip" data-id="@c.Id">@c.Name</span>
-                    }
-                }
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Notifications -->
     @if (TempData["CartSubmitted"] != null)

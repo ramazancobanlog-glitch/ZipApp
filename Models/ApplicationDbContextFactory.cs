@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace login.Data
 {
@@ -9,31 +8,19 @@ namespace login.Data
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            // Prefer environment variable for design-time migrations so dotnet-ef
-            // can connect to a remote database (useful for CI or remote DBs)
+
+            // Ortam değişkeni varsa kullan, yoksa default LocalDB connection string
             var envConn = Environment.GetEnvironmentVariable("DefaultConnection")
                           ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+
             var conn = string.IsNullOrWhiteSpace(envConn)
-                ? "Server=sql7.freesqldatabase.com;Port=3306;Database=sql7808503;User=sql7808503;Password=ZNzeqYbxrG;"
+                ? "Server=(localdb)\\MSSQLLocalDB;Database=LoginDB;Trusted_Connection=True;TrustServerCertificate=True;"
                 : envConn;
-            try
+
+            optionsBuilder.UseSqlServer(conn, sqlOptions =>
             {
-                // Try AutoDetect (works when connection can be established)
-                optionsBuilder.UseMySql(conn, ServerVersion.AutoDetect(conn), mySqlOptions =>
-                {
-                    mySqlOptions.EnableRetryOnFailure();
-                });
-            }
-            catch
-            {
-                // If AutoDetect fails (e.g., remote DB blocked), fall back to a default MySQL Server version
-                // This prevents EF design-time exceptions when the DB is inaccessible.
-                var serverVersion = new MySqlServerVersion(new Version(8, 0, 32));
-                optionsBuilder.UseMySql(conn, serverVersion, mySqlOptions =>
-                {
-                    mySqlOptions.EnableRetryOnFailure();
-                });
-            }
+                sqlOptions.EnableRetryOnFailure(); // opsiyonel ama önerilir
+            });
 
             return new ApplicationDbContext(optionsBuilder.Options);
         }

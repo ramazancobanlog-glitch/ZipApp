@@ -1,7 +1,7 @@
 using login.Data;
 using login.Services;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,32 +10,18 @@ builder.Services.AddControllersWithViews();
 // add SignalR services for real-time notifications
 builder.Services.AddSignalR();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    // prefer environment variable for connection string (set by Render or local environment)
-    var connectionString = Environment.GetEnvironmentVariable("DefaultConnection")
-        ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-        ?? builder.Configuration.GetConnectionString("DefaultConnection");
-    // Use Pomelo MySQL EF Core provider
-    try
-    {
-        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString), mySqlOptions =>
-        {
-            mySqlOptions.EnableRetryOnFailure();
-        });
-    }
-    catch
-    {
-        // If AutoDetect fails (for example when remote DB is blocked during development),
-        // use a default server version as a fallback so the app can still start for local dev.
-        var serverVersion = new MySqlServerVersion(new Version(8, 0, 32));
-        options.UseMySql(connectionString, serverVersion, mySqlOptions =>
-        {
-            mySqlOptions.EnableRetryOnFailure();
-        });
-    }
-});
+// LocalDB connection string
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Add DbContext with SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(); // opsiyonel ama tavsiye edilir
+    })
+);
+
+// Add Session
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
@@ -43,11 +29,20 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// Add Authentication (Cookie)
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Login/Index";    // giriş yapılmadığında yönlendirilecek sayfa
+        options.LogoutPath = "/Login/Logout";  // çıkış yapıldığında yönlendirilecek sayfa
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    });
+
 // Configure Email Service
 builder.Services.AddSingleton<EmailService>();
-// Configure Iyzico (Iyzipay) service
 builder.Services.AddSingleton<IyzipayService>();
-// Make HttpContext available to ViewComponents and services
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
@@ -56,6 +51,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
+
+app.UseAuthentication(); // <- BUNU EKLEDİK
 app.UseAuthorization();
 
 app.MapControllerRoute(
