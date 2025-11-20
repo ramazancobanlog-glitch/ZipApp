@@ -7,7 +7,7 @@
         <div class="col-lg-7">
             <div class="card-like p-4">
                 <h1 class="fw-bold" style="color:#FF6B35; font-size:2rem;">Günlük Fırsatlar ve Hemen Teslim</h1>
-                <p class="muted mb-3">Binlerce kategori, güvenli ödeme ve hızlı teslimat — Hepsiburada tarzı deneyimi ZipApp ile yaşayın.</p>
+                <p class="muted mb-3">Binlerce kategori, güvenli ödeme ve hızlı teslimat — Mükemmel deneyimi ZipApp ile yaşayın.</p>
                 <div class="d-flex gap-2 flex-wrap">
                     <a href="#products" class="btn btn-primary btn-lg">Ürünleri Keşfet</a>
                 </div>
@@ -47,48 +47,130 @@
     <!-- Notifications -->
     @if (TempData["CartSubmitted"] != null)
     {
-        <div class="alert alert-success">@TempData["CartSubmitted"]</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["CartSubmitted"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     }
 
     <!-- Products -->
-    <section id="products" class="mb-4">
-        <div class="d-flex justify-content-between align-items-end mb-3">
+    <section id="products" class="mb-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
                 <h3 class="fw-bold mb-0">Öne Çıkan Ürünler</h3>
-                <small class="muted">Popüler ürünler ve günlük indirimler</small>
+                <small class="text-muted">Popüler ürünler ve günlük indirimler</small>
             </div>
-            <div><a href="#" class="muted">Tümünü Gör →</a></div>
+            <div><a href="#" class="text-decoration-none">Tümünü Gör →</a></div>
         </div>
 
-        <div class="product-list">
+        <div class="row g-4">
             @if (Model.Products != null && Model.Products.Any())
             {
                 foreach (var p in Model.Products)
                 {
-                    <div class="product-card position-relative" data-category-id="@p.CategoryId">
-                        <div style="height:160px;overflow:hidden;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fbfdff;margin-bottom:0.75rem;">
-                            <img src="@Url.Content(p.ImageUrl ?? "~/img/mouse.jpg")" alt="@p.Name" style="max-height:140px;max-width:100%;object-fit:contain;" />
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="product-card" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s ease; height: 100%; display: flex; flex-direction: column;">
+                            
+                            <!-- Resim Bölümü -->
+                            <div class="product-image-wrapper" style="position: relative; width: 100%; height: 180px; background: linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                <img src="@Url.Content(p.ImageUrl ?? "~/img/mouse.jpg")" 
+                                     alt="@p.Name" 
+                                     style="max-height: 150px; max-width: 90%; object-fit: contain; transition: transform 0.3s ease;" />
+                                
+                                <!-- İndirim Badge -->
+                                <div style="position: absolute; top: 10px; right: 10px; background: #ef4444; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px; z-index: 10;">
+                                    <i class="bi bi-lightning-fill" style="font-size: 0.85rem;"></i>-20%
+                                </div>
+
+                                <!-- Favori Butonu -->
+                                <button style="position: absolute; top: 10px; left: 10px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10;" type="button" class="heart-btn">
+                                    <i class="bi bi-heart" style="font-size: 1.1rem; color: #6b7280;"></i>
+                                </button>
+
+                                <!-- Hover Overlay -->
+                                <div style="position: absolute; inset: 0; background: rgba(0,0,0,0); transition: background 0.3s ease;" class="product-overlay"></div>
+                            </div>
+
+                            <!-- İçerik Bölümü -->
+                            <div style="padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                                
+                                <!-- Kategori -->
+                                <div style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">
+                                    @p.Category?.Name
+                                </div>
+
+                                <!-- Ürün Adı -->
+                                <h6 style="font-size: 0.95rem; font-weight: 600; color: #111827; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                    @p.Name
+                                </h6>
+
+                                <!-- Rating -->
+                                <div style="display: flex; align-items: center; gap: 4px; font-size: 0.85rem;">
+                                    <div style="color: #fbbf24; letter-spacing: -2px;">
+                                        <i class="bi bi-star-fill" style="font-size: 0.7rem;"></i><i class="bi bi-star-fill" style="font-size: 0.7rem;"></i><i class="bi bi-star-fill" style="font-size: 0.7rem;"></i><i class="bi bi-star-fill" style="font-size: 0.7rem;"></i><i class="bi bi-star-half" style="font-size: 0.7rem;"></i>
+                                    </div>
+                                    <span style="color: #9ca3af; font-size: 0.75rem;">(92)</span>
+                                </div>
+
+                                <!-- Fiyat -->
+                                <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 4px;">
+                                    <span style="font-size: 1.1rem; font-weight: 700; color: #3b82f6;">
+                                        @TurkishLiraFormatting.Format(p.Price)
+                                    </span>
+                                    <del style="font-size: 0.8rem; color: #d1d5db;">
+                                        @TurkishLiraFormatting.Format(p.Price * 1.25M)
+                                    </del>
+                                </div>
+
+                                <!-- Stok ve Kargo -->
+                                <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.7rem; margin-top: 4px;">
+                                    <span style="background: #d1fae5; color: #065f46; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+                                        <i class="bi bi-check-circle" style="font-size: 0.65rem;"></i>Stokta
+                                    </span>
+                                    <span style="background: #dbeafe; color: #0c4a6e; padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 3px; white-space: nowrap;">
+                                        <i class="bi bi-truck" style="font-size: 0.65rem;"></i>Ücretsiz
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Sepete Ekle Butonu -->
+                            <div style="padding: 0 12px 12px 12px; margin-top: auto;">
+                                <form class="ajax-add-to-cart w-100" method="post" action="/Cart/AddToCartAjax">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="productId" value="@p.Id" />
+                                    <button type="submit" style="width: 100%; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid transparent;">
+                                        <i class="bi bi-bag-plus" style="font-size: 1rem;"></i>Sepete Ekle
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        <h4 class="mb-1">@p.Name</h4>
-                        <small class="muted">@p.Category?.Name</small>
-                        <div class="mb-2">@TurkishLiraFormatting.Format(p.Price)</div>
-                        <div class="mb-3 muted small">@p.Category?.Name • Stokta var • Ücretsiz kargo</div>
-                        <form class="ajax-add-to-cart" method="post" action="/Cart/AddToCartAjax">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="productId" value="@p.Id" />
-                            <input type="hidden" name="categoryId" value="@p.CategoryId" />
-                            <button class="btn btn-primary w-100 d-flex align-items-center justify-content-center" type="submit" style="border-radius:10px;padding:0.6rem 0.8rem;">
-                               <i class="bi bi-bag"></i>Sepete Ekle
-                            </button>
-                        </form> 
                     </div>
                 }
             }
             else
             {
-                <div class="card-like text-center p-5">Henüz ürün yok. Lütfen daha sonra tekrar deneyin.</div>
+                <div class="col-12">
+                    <div style="background: white; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                        <i class="bi bi-inbox" style="font-size: 3rem; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
+                        <h5 style="color: #9ca3af; margin: 0 0 8px 0;">Henüz ürün yok</h5>
+                        <p style="color: #d1d5db; margin: 0; font-size: 0.9rem;">Lütfen daha sonra tekrar deneyin.</p>
+                    </div>
+                </div>
             }
         </div>
     </section>
-
-    
+</div>

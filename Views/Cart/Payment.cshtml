@@ -1,11 +1,196 @@
 @model string
 
 @{
-    ViewData["Title"] = "İyzico Ödeme";
+    ViewData["Title"] = "Ödeme İşlemi";
 }
 
-<h2>Ödeme İşlemi</h2>
+<div class="container-fluid py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-header bg-gradient text-white p-4 rounded-top-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="mb-0">
+                                <i class="bi bi-credit-card me-2"></i>Ödeme İşlemi
+                            </h1>
+                            <p class="mb-0 mt-2 small">Güvenli ödeme sistemi ile hızlı ve kolay ödeyin</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="badge bg-success rounded-pill px-3 py-2 fs-6">
+                                <i class="bi bi-shield-check me-1"></i>100% Güvenli
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-<div>
-    @Html.Raw(Model)
+                <div class="card-body p-5">
+                    <!-- Ödeme Yöntemi Seçimi -->
+                    <div class="mb-5">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-wallet2 text-primary me-2"></i>Ödeme Yöntemi
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="payment-option p-3 border-2 border-primary rounded-3 bg-light text-center cursor-pointer">
+                                    <i class="bi bi-credit-card fs-2 text-primary mb-2 d-block"></i>
+                                    <h6 class="mb-0">Kredi/Debit Kartı</h6>
+                                    <small class="text-muted">Visa, Mastercard</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="payment-option p-3 border-2 rounded-3 text-center cursor-pointer opacity-50">
+                                    <i class="bi bi-phone fs-2 text-secondary mb-2 d-block"></i>
+                                    <h6 class="mb-0">Mobil Ödeme</h6>
+                                    <small class="text-muted">Yakında</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="payment-option p-3 border-2 rounded-3 text-center cursor-pointer opacity-50">
+                                    <i class="bi bi-bank fs-2 text-secondary mb-2 d-block"></i>
+                                    <h6 class="mb-0">Banka Transferi</h6>
+                                    <small class="text-muted">Yakında</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teslimat Bilgileri -->
+                    <div class="mb-5 pb-4 border-bottom">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-geo-alt text-primary me-2"></i>Teslimat Bilgileri
+                        </h5>
+                        <div class="alert alert-info border-0 rounded-3">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Not:</strong> Teslimat adresi kayıtlı adresiniz üzerine yapılacaktır.
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Ad Soyad</label>
+                                <input type="text" class="form-control form-control-lg rounded-3" placeholder="Alıcı adı" disabled />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Telefon</label>
+                                <input type="tel" class="form-control form-control-lg rounded-3" placeholder="0(5XX) XXX XX XX" disabled />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold">Adres</label>
+                                <textarea class="form-control form-control-lg rounded-3" rows="3" placeholder="Teslimat adresi" disabled></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sipariş Özeti -->
+                    <div class="mb-5 pb-4 border-bottom">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-receipt text-primary me-2"></i>Sipariş Özeti
+                        </h5>
+                        <div class="bg-light p-4 rounded-3">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Ürünler Toplamı</span>
+                                <span class="fw-bold">-</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Kargo Ücreti</span>
+                                <span class="fw-bold">Ücretsiz</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">İndirim</span>
+                                <span class="fw-bold text-success">-</span>
+                            </div>
+                            <hr class="my-3" />
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold fs-5">Toplam Tutar</span>
+                                <span class="fw-bold fs-5 text-primary">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- İyzico Ödeme Formu -->
+                    <div class="payment-form-container mb-4">
+                        <div class="alert alert-warning border-0 rounded-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Aşağıdaki güvenli form ile ödeme işlemi gerçekleştirilecektir.
+                        </div>
+                        @Html.Raw(Model)
+                    </div>
+
+                    <!-- Koşul ve Şartlar -->
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" required />
+                            <label class="form-check-label" for="agreeTerms">
+                                <a href="#" class="text-decoration-none">Kullanım Koşulları</a> ve 
+                                <a href="#" class="text-decoration-none">Gizlilik Politikasını</a> 
+                                okudum ve kabul ediyorum.
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ödeme Güvenliği -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <i class="bi bi-shield-check text-success fs-4 me-3"></i>
+                                <div>
+                                    <small class="text-muted d-block">SSL Güvenliği</small>
+                                    <strong>Korumalı Bağlantı</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <i class="bi bi-lock-fill text-success fs-4 me-3"></i>
+                                <div>
+                                    <small class="text-muted d-block">3D Secure</small>
+                                    <strong>Şifreli İşlem</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center p-3 bg-light rounded-3">
+                                <i class="bi bi-check-circle text-success fs-4 me-3"></i>
+                                <div>
+                                    <small class="text-muted d-block">İyzico Onaylı</small>
+                                    <strong>Güvenilir Ödeme</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Geri Dön Butonu -->
+                    <div class="d-flex gap-2">
+                        <a href="@Url.Action("Index", "Cart")" class="btn btn-outline-secondary btn-lg rounded-3 flex-grow-1">
+                            <i class="bi bi-arrow-left me-2"></i>Sepete Dön
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-light rounded-bottom-4 p-4">
+                    <p class="mb-0 text-muted text-center">
+                        <small>
+                            <i class="bi bi-telephone me-1"></i>
+                            Ödeme ile ilgili sorularınız için: <strong>0(850) XXX XX XX</strong>
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+    .payment-option {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-option:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+</style>

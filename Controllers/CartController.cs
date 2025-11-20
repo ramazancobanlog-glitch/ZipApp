@@ -28,65 +28,68 @@ namespace login.Controllers
 			_logger = logger;
 		}
 
-		// POST: /Cart/AddToCart
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public IActionResult AddToCart(int productId)
+	// POST: /Cart/AddToCart
+	[HttpPost]
+	[ValidateAntiForgeryToken]
+	public IActionResult AddToCart(int productId)
+	{
+		// detect AJAX/fetch requests
+		var isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest" || (Request.ContentType != null && Request.ContentType.Contains("application/json"));
+
+		var username = HttpContext.Session.GetString("Username");
+		if (string.IsNullOrEmpty(username))
 		{
-			// detect AJAX/fetch requests
-			var isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest" || (Request.ContentType != null && Request.ContentType.Contains("application/json"));
-
-			var username = HttpContext.Session.GetString("Username");
-			if (string.IsNullOrEmpty(username))
-			{
-				if (isAjax)
-					return Json(new { success = false, redirect = Url.Action("Index", "Login") });
-				return RedirectToAction("Index", "Login");
-			}
-
-			var product = _context.Products.Find(productId);
-			if (product == null)
-			{
-				if (isAjax)
-					return Json(new { success = false, message = "Ürün bulunamadı." });
-				return NotFound();
-			}
-
-			var cart = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Username == username && c.Status == CartStatus.Draft);
-			if (cart == null)
-			{
-				cart = new Cart { Username = username };
-				_context.Carts.Add(cart);
-				_context.SaveChanges();
-				// reload including items
-				cart = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Id == cart.Id)!;
-			}
-
-			var existing = cart.Items?.FirstOrDefault(i => i.ProductId == productId);
-			if (existing != null)
-			{
-				existing.Quantity += 1;
-			}
-			else
-			{
-				var item = new CartItem { CartId = cart.Id, ProductId = productId, Quantity = 1 };
-				_context.CartItems.Add(item);
-			}
-
-			_context.SaveChanges();
-
-			// If request is AJAX (fetch), return JSON so client can stay on page
-			if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.ContentType == "application/json")
-			{
-				var cartReload = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Username == username && c.Status == CartStatus.Draft);
-				var itemCount = cartReload?.Items?.Sum(i => i.Quantity) ?? 0;
-				return Json(new { success = true, count = itemCount });
-			}
-
-			return RedirectToAction("Index", "Home");
+			if (isAjax)
+				return Json(new { success = false, redirect = Url.Action("Index", "Login"), message = "Ürün sepetine eklemek için lütfen giriş yapın." });
+			
+			// Store the product ID to add after login
+			HttpContext.Session.SetString("ProductToAdd", productId.ToString());
+			TempData["Message"] = "Ürün sepetine eklemek için giriş yapmanız gerekir.";
+			return RedirectToAction("Index", "Login");
 		}
 
-		[HttpPost]
+		var product = _context.Products.Find(productId);
+		if (product == null)
+		{
+			if (isAjax)
+				return Json(new { success = false, message = "Ürün bulunamadı." });
+			return NotFound();
+		}
+
+		var cart = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Username == username && c.Status == CartStatus.Draft);
+		if (cart == null)
+		{
+			cart = new Cart { Username = username };
+			_context.Carts.Add(cart);
+			_context.SaveChanges();
+			// reload including items
+			cart = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Id == cart.Id)!;
+		}
+
+		var existing = cart.Items?.FirstOrDefault(i => i.ProductId == productId);
+		if (existing != null)
+		{
+			existing.Quantity += 1;
+		}
+		else
+		{
+			var item = new CartItem { CartId = cart.Id, ProductId = productId, Quantity = 1 };
+			_context.CartItems.Add(item);
+		}
+
+		_context.SaveChanges();
+
+		// If request is AJAX (fetch), return JSON so client can stay on page
+		if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.ContentType == "application/json")
+		{
+			var cartReload = _context.Carts.Include(c => c.Items).FirstOrDefault(c => c.Username == username && c.Status == CartStatus.Draft);
+			var itemCount = cartReload?.Items?.Sum(i => i.Quantity) ?? 0;
+			return Json(new { success = true, count = itemCount, message = $"{product.Name} sepete eklendi!" });
+		}
+
+		TempData["SuccessMessage"] = $"{product.Name} sepete başarıyla eklendi!";
+		return RedirectToAction("Index", "Home");
+	}		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public IActionResult AddToCartAjax([FromForm] int productId)
 		{

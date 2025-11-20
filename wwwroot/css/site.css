@@ -109,6 +109,57 @@ tr.approved td{background:#e9f8ee}
 /* AJAX alert container for toast-like messages */
 #ajax-alert .alert { min-width: 260px; box-shadow: 0 8px 28px rgba(11,43,90,0.08); border-radius: 8px; }
 
+/* Product Card Styling */
+.product-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.product-card:hover {
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+  transform: translateY(-4px);
+}
+
+.product-card:hover .product-image-wrapper {
+  background: linear-gradient(135deg, #f0f4f8 0%, #e5ecf5 100%);
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
+}
+
+.product-card:hover .product-overlay {
+  background: rgba(0,0,0,0.04) !important;
+}
+
+.product-card button[type="submit"] {
+  transition: all 0.2s ease;
+}
+
+.product-card button[type="submit"]:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+}
+
+.product-card button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Heart Button Animation */
+.heart-btn {
+  transition: all 0.2s ease;
+}
+
+.heart-btn:hover {
+  background-color: #fff3cd !important;
+  transform: scale(1.1);
+}
+
+.heart-btn.liked {
+  color: #ef4444 !important;
+  background-color: #fee2e2 !important;
+}
+
 /* responsive tweaks for product grid */
 .product-list{gap:1rem}
 
