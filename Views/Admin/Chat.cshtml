@@ -25,17 +25,45 @@
         </div>
     </div>
 
-    <div class="row">
-        <!-- Sol Taraf: Aktif Konuşmalar Listesi -->
-        <div class="col-lg-3 mb-4">
-            <div class="card shadow-sm border-0">
+    <!-- Mobil için: Müşteri Seçim Butonu -->
+    <div class="row mb-3 d-lg-none">
+        <div class="col-12">
+            <button class="btn btn-info w-100" data-bs-toggle="offcanvas" data-bs-target="#customerOffcanvas">
+                <i class="bi bi-list me-2"></i> Müşteri Listesini Aç
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobil Offcanvas: Müşteri Listesi -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="customerOffcanvas" aria-labelledby="customerOffcanvasLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="customerOffcanvasLabel">
+                <i class="bi bi-people me-2" style="color: #FF6B35;"></i>
+                Aktif Müşteriler
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Kapat"></button>
+        </div>
+        <div class="offcanvas-body p-0">
+            <div class="list-group list-group-flush" id="customerListMobile">
+                <div class="list-group-item p-3 text-center text-muted">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <small>Müşteri bağlantısı bekleniyor...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="height: calc(100vh - 200px);">
+        <!-- Sol Taraf: Aktif Konuşmalar Listesi (Masaüstü) -->
+        <div class="col-lg-3 mb-4 d-none d-lg-block">
+            <div class="card shadow-sm border-0" style="height: 100%; max-height: 600px; display: flex; flex-direction: column;">
                 <div class="card-header bg-white border-bottom">
                     <h5 class="mb-0">
                         <i class="bi bi-people me-2" style="color: #FF6B35;"></i>
                         Aktif Müşteriler
                     </h5>
                 </div>
-                <div class="list-group list-group-flush" id="customerList">
+                <div class="list-group list-group-flush" id="customerList" style="flex: 1; overflow-y: auto;">
                     <div class="list-group-item p-3 text-center text-muted">
                         <i class="bi bi-hourglass-split me-2"></i>
                         <small>Müşteri bağlantısı bekleniyor...</small>
@@ -46,7 +74,7 @@
 
         <!-- Sağ Taraf: Sohbet Penceresi -->
         <div class="col-lg-9">
-            <div class="card shadow-sm border-0 h-100">
+            <div class="card shadow-sm border-0" style="height: 100%; max-height: 600px; display: flex; flex-direction: column;">
                 <!-- Başlık: Seçili Müşteri Bilgisi -->
                 <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
                     <div>
@@ -62,7 +90,7 @@
                 </div>
 
                 <!-- Sohbet Mesajları Alanı -->
-                <div id="adminChatMessages" style="height: 400px; overflow-y: auto; background: #f9f9f9; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+                <div id="adminChatMessages" style="flex: 1; overflow-y: auto; background: #f9f9f9; padding: 20px; display: flex; flex-direction: column; gap: 10px;">
                     <div class="text-center text-muted mt-5">
                         <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
                         <p class="mt-2">Sohbet seçiniz veya müşteri bağlantı kurmasını bekleyiniz</p>
@@ -79,6 +107,16 @@
                     </div>
                     <div id="typingIndicator" class="mt-2 text-muted" style="display: none;">
                         <small><i class="bi bi-pencil me-1"></i> <span id="typingCustomerName">Müşteri</span> yazıyor...</small>
+                    </div>
+                    <!-- Debug Panel -->
+                    <div class="mt-3 p-2 border-top">
+                        <small class="text-muted d-block">
+                            <strong>Debug:</strong> 
+                            <span id="connectionStatus">Bağlantı: ⏳ Kontrol ediliyor...</span>
+                        </small>
+                        <small class="text-muted d-block">
+                            <strong>Müşteri Sayısı:</strong> <span id="customerCount">0</span>
+                        </small>
                     </div>
                 </div>
             </div>
@@ -98,15 +136,25 @@
         Notification.requestPermission();
     }
 
+    // Test için: Simüle edilmiş müşteri (çıkarılabilir)
+    setTimeout(() => {
+        console.warn("⏰ 3 saniye sonra test müşterisi ekleniyor (Debug: İlk bağlantıyı test edin)");
+    }, 3000);
+
     // Admin bağlantısını kur
     const adminConnection = new signalR.HubConnectionBuilder()
-        .withUrl("/hubs/chat")
+        .withUrl("/hubs/chat?isAdmin=true")
         .withAutomaticReconnect()
         .build();
 
     // Admin grubuna ait müşteriden mesaj al
     adminConnection.on("ReceiveCustomerMessage", (data) => {
-        console.log("Müşteri mesajı:", data.message, "Gönderen:", data.userName, "CustomerId:", data.customerId);
+        console.log("📨 Müşteri mesajı:", data.message, "Gönderen:", data.userName, "CustomerId:", data.customerId);
+        
+        // Müşteri bilgisini güncelle
+        if (data.customerId && !customersInfo[data.customerId]) {
+            customersInfo[data.customerId] = { name: data.userName, ip: "Bilinmiyor" };
+        }
         
         // Eğer bu müşterinin konuşması seçiliyse, mesajı göster
         if (selectedCustomerId === data.customerId) {
@@ -117,13 +165,16 @@
         showCustomerNotification(data.customerId, data.userName, data.message);
     });
 
-    // Müşteri bildirim mesajı aldığında
+    // Admin'in gönderdiği mesaj onayı
+    adminConnection.on("AdminMessageSent", (data) => {
+        console.log("✅ Admin mesajı gönderildi:", data.message, "CustomerId:", data.customerId);
+    });
 
     // Chat geçmişi yükle
     adminConnection.on("LoadChatHistory", (messages) => {
-        console.log("Chat geçmişi yüklendi:", messages.length, "mesaj");
+        console.log("📚 Chat geçmişi yüklendi:", messages.length, "mesaj");
         let chatBox = document.getElementById("adminChatMessages");
-        chatBox.innerHTML = ""; // Önce temizle
+        chatBox.innerHTML = "";
 
         if (messages.length === 0) {
             chatBox.innerHTML = `
@@ -134,7 +185,6 @@
             return;
         }
 
-        // Geçmiş mesajları göster
         messages.forEach(msg => {
             displayAdminChatMessage(msg.message, msg.senderName, msg.isAdmin);
         });
@@ -146,16 +196,28 @@
             showAdminTypingIndicator(data.customerName);
         }
     });
+    
+    // Admin yazıyor göstergesi (müşteriye gönderilir)
+    adminConnection.on("ShowAdminTyping", (adminName) => {
+        console.log("Admin yazıyor:", adminName);
+    });
+    
     // Yazıyor göstergesini kaldır
-    adminConnection.on("StopTyping", (customerId) => {
-        if (selectedCustomerId === customerId) {
-            hideAdminTypingIndicator();
+    adminConnection.on("StopTyping", (data) => {
+        if (typeof data === 'string') {
+            if (selectedCustomerId === data) {
+                hideAdminTypingIndicator();
+            }
+        } else if (data && data.customerId) {
+            if (selectedCustomerId === data.customerId) {
+                hideAdminTypingIndicator();
+            }
         }
     });
 
-    // Müşteri bağlandığında
+    // 🟢 Müşteri bağlandığında
     adminConnection.on("CustomerConnected", (data) => {
-        console.log("Müşteri bağlandı:", data.customerName);
+        console.log("🟢 Müşteri bağlandı:", data.customerName, "IP:", data.ipAddress);
         addCustomerToList(data.customerId, data.customerName, true, data.ipAddress);
         
         // İlk müşteri otomatik seçilsin
@@ -164,9 +226,9 @@
         }
     });
 
-    // Müşteri ayrıldığında
+    // ⚫ Müşteri ayrıldığında
     adminConnection.on("CustomerDisconnected", (customerId) => {
-        console.log("Müşteri ayrıldı");
+        console.log("⚫ Müşteri ayrıldı:", customerId);
         updateCustomerStatus(customerId, false);
     });
 
@@ -174,14 +236,50 @@
     adminConnection.start()
         .then(() => {
             console.log("✅ Admin SignalR Chat Hub bağlantısı kuruldu!");
+            console.log("Admin Connection ID:", adminConnection.connectionId);
+            console.log("Admin Connection State:", adminConnection.state);
+            
+            // Debug panel güncelle
+            document.getElementById("connectionStatus").textContent = "Bağlantı: ✅ Kuruldu";
+            document.getElementById("connectionStatus").style.color = "#25d366";
+            
+            // Bağlantı başarılı olduktan sonra müşteri listesini al
+            console.log("📨 Admin hazır, müşteri bağlantılarını bekliyorum...");
         })
         .catch(err => {
             console.error("❌ Admin SignalR Chat Hub Hatası:", err);
+            console.error("Hata detayları:", {
+                message: err.message,
+                statusCode: err.statusCode,
+                innerError: err.innerError
+            });
+            
+            // Debug panel güncelle
+            document.getElementById("connectionStatus").textContent = "Bağlantı: ❌ Hata - " + err.message;
+            document.getElementById("connectionStatus").style.color = "#dc3545";
         });
+    
+    // Müşteri sayısını gerçek zamanlı güncelle
+    setInterval(() => {
+        let customerList = document.getElementById("customerList");
+        let customerCount = customerList?.querySelectorAll(".list-group-item:not(.text-muted)").length || 0;
+        document.getElementById("customerCount").textContent = customerCount;
+    }, 500);
 
     // Müşteri listesine müşteri ekle
     function addCustomerToList(customerId, customerName, isOnline, ipAddress) {
+        console.log("👤 addCustomerToList çağrıldı:", { customerId, customerName, isOnline, ipAddress });
+        
+        // Masaüstü listesi
         let customerList = document.getElementById("customerList");
+        // Mobil listesi
+        let customerListMobile = document.getElementById("customerListMobile");
+        
+        if (!customerList && !customerListMobile) {
+            console.error("❌ customerList elementleri bulunamadı!");
+            return;
+        }
+        
         let existingItem = document.getElementById("customer-" + customerId);
 
         // Müşteri bilgisini sakla
@@ -191,14 +289,24 @@
         };
 
         if (existingItem) {
+            console.log("Müşteri zaten listede, güncelleniyor...");
             // Var olan müşteriyi güncelle
             existingItem.classList.toggle("list-group-item-info", isOnline);
             return;
         }
 
-        // Boş mesajı kaldır
-        if (customerList.children.length === 1 && customerList.children[0].classList.contains("text-muted")) {
-            customerList.innerHTML = "";
+        // Boş mesajları kaldır
+        if (customerList) {
+            let emptyMessage = customerList.querySelector(".text-muted");
+            if (emptyMessage) {
+                customerList.innerHTML = "";
+            }
+        }
+        if (customerListMobile) {
+            let emptyMessage = customerListMobile.querySelector(".text-muted");
+            if (emptyMessage) {
+                customerListMobile.innerHTML = "";
+            }
         }
 
         // Yeni müşteri öğesi oluştur
@@ -218,8 +326,23 @@
             </div>
         `;
 
-        customerItem.onclick = () => selectCustomer(customerId, customerName);
-        customerList.appendChild(customerItem);
+        customerItem.onclick = () => {
+            console.log("Müşteri tıklandı:", customerId);
+            selectCustomer(customerId, customerName);
+            // Mobilde offcanvas'ı kapat
+            let offcanvas = document.getElementById("customerOffcanvas");
+            if (offcanvas) {
+                let bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvas);
+                if (bsOffcanvas) bsOffcanvas.hide();
+            }
+        };
+        
+        // Masaüstü listesine ekle
+        if (customerList) customerList.appendChild(customerItem.cloneNode(true));
+        // Mobil listesine ekle
+        if (customerListMobile) customerListMobile.appendChild(customerItem);
+        
+        console.log("✅ Müşteri listeye eklendi:", customerName);
     }
 
     // Müşteri seç
@@ -350,10 +473,21 @@
     function updateCustomerStatus(customerId, isOnline) {
         let customerItem = document.getElementById("customer-" + customerId);
         if (customerItem) {
-            let statusText = customerItem.querySelector("small");
+            // Status'u göster/gizle
+            let statusText = customerItem.querySelectorAll("small")[0]; // İlk small (status)
             if (statusText) {
                 statusText.textContent = isOnline ? "🟢 Çevrimiçi" : "⚫ Çevrimdışı";
+                statusText.style.color = isOnline ? "#25d366" : "#6c757d";
             }
+            
+            // Stil güncelle
+            if (isOnline) {
+                customerItem.classList.add("list-group-item-info");
+            } else {
+                customerItem.classList.remove("list-group-item-info");
+            }
+            
+            console.log("Status güncellendi:", customerId, isOnline ? "Çevrimiçi" : "Çevrimdışı");
         }
     }
 

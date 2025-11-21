@@ -476,7 +476,7 @@
         }
 
         // ✅ SignalR Bağlantısı - Gerçek Zamanlı Sohbet
-        // Hub'a bağlanmak için SignalR bağlantı kurulumu
+        // Hub'a bağlanmak için SignalR bağlantı kurulumu (müşteri olarak, admin parametresi yok)
         let chatConnection = new signalR.HubConnectionBuilder()
             .withUrl("/hubs/chat")
             .withAutomaticReconnect()
@@ -563,11 +563,12 @@
         // SignalR bağlantısını başlat
         chatConnection.start()
             .then(() => {
-                console.log("✅ SignalR Chat Hub'a bağlı olundu!");
-                // Bağlandığında müşteri grubuna ekle
-                // chatConnection.invoke("JoinCustomerGroup").catch(err => console.error(err));
+                console.log("✅ Müşteri SignalR Chat Hub'a bağlı olundu!");
             })
-            .catch(err => console.error("❌ SignalR Bağlantı Hatası:", err));
+            .catch(err => {
+                console.error("❌ Müşteri SignalR Bağlantı Hatası:", err);
+                alert("Destek ekibi ile bağlantı kurulamadı. Lütfen sayfayı yenileyin.");
+            });
 
         // ✅ Mesaj Gönderme Fonksiyonu (SignalR ile)
         function sendMessage() {
