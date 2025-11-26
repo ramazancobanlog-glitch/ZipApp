@@ -23,6 +23,18 @@ namespace login.Controllers
                 .Include(p => p.Category)
                 .ToList();
             var categories = _context.Categories.ToList();
+            string GetIp(HttpContext context)
+            {
+                var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                if (string.IsNullOrEmpty(ip))
+                {
+                    ip = context.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                }
+                return ip;
+            }
+            
+            var userIp = GetIp(HttpContext);
+            Console.WriteLine($"Kullanýcý IP Adresi: {userIp}");
 
             var vm = new HomeIndexViewModel
             {

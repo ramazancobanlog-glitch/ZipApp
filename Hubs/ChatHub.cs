@@ -54,12 +54,7 @@ namespace login.Hubs
 
         public async Task SendMessageToCustomer(string message, string adminName, string customerId)
         {
-            if (string.IsNullOrWhiteSpace(message) || string.IsNullOrWhiteSpace(customerId))
-            {
-                Console.WriteLine("❌ Hata: Mesaj veya CustomerId boş");
-                return;
-            }
-            
+            if (string.IsNullOrWhiteSpace(message)) return;
             var timestamp = DateTime.Now.ToString("HH:mm:ss");
 
             // Chat geçmişine ekle
@@ -92,8 +87,6 @@ namespace login.Hubs
                 customerId,
                 timestamp
             });
-            
-            Console.WriteLine($"✅ Admin mesajı gönderildi: '{message}' -> CustomerId: {customerId}");
         }
 
         // Chat geçmişini getir
@@ -158,15 +151,15 @@ namespace login.Hubs
 
         public override async Task OnConnectedAsync()
         {
-            // Admin check - Önce Session kontrolü yap
-            var httpContext = Context.GetHttpContext();
-            var isAdmin = httpContext?.Session?.GetString("IsAdmin") == "True";
+            // Admin check - Context.User veya Session
+            var isAdmin = Context.User?.Identity?.IsAuthenticated ?? false;
             
-            // Session'da yoksa, query string'den isAdmin parametresi al
+            // Eğer Context.User authenticated değilse, query string'den token veya başka yol check et
             if (!isAdmin)
             {
+                var httpContext = Context.GetHttpContext();
                 var adminParam = httpContext?.Request.Query["isAdmin"].ToString();
-                isAdmin = adminParam?.ToLower() == "true";
+                isAdmin = adminParam == "true" || (httpContext?.Session?.GetString("IsAdmin") == "True");
             }
             
             // IP adresini al
@@ -180,26 +173,12 @@ namespace login.Hubs
             
             ipAddress = ipAddress ?? "Bilinmiyor";
             
-            Console.WriteLine($"🔗 Bağlantı: {Context.ConnectionId}, IsAdmin: {isAdmin}, User: {Context.User?.Identity?.Name ?? "Anonymous"}, IP: {ipAddress}");
+            Console.WriteLine($"🔗 Bağlantı: {Context.ConnectionId}, IsAdmin: {isAdmin}, User: {Context.User?.Identity?.Name ?? "Anonymous"}");
             
             if (isAdmin)
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, "admins");
                 Console.WriteLine($"✅ Admin bağlandı: {Context.ConnectionId}");
-                
-                // Admin bağlanırken, zaten bağlı tüm müşterileri gönder
-                Console.WriteLine($"📤 Bağlı müşteri sayısı: {ConnectedCustomers.Count}");
-                foreach (var customer in ConnectedCustomers.Values)
-                {
-                    await Clients.Caller.SendAsync("CustomerConnected", new
-                    {
-                        customerId = customer.ConnectionId,
-                        customerName = customer.CustomerName,
-                        ipAddress = customer.IpAddress,
-                        connectedAt = customer.ConnectedAt
-                    });
-                    Console.WriteLine($"📤 Var olan müşteri gönderildi: {customer.CustomerName} ({customer.ConnectionId})");
-                }
             }
             else
             {
@@ -218,8 +197,6 @@ namespace login.Hubs
                 ConnectedCustomers[Context.ConnectionId] = customerInfo;
 
                 // Admin'lere müşteri bağlanma bildirimi gönder
-                Console.WriteLine($"📤 Müşteri bağlanma bildirimi gönderiliyor: {Context.ConnectionId}");
-                
                 await Clients.Group("admins").SendAsync("CustomerConnected", new
                 {
                     customerId = Context.ConnectionId,
@@ -228,7 +205,7 @@ namespace login.Hubs
                     connectedAt = customerInfo.ConnectedAt
                 });
 
-                Console.WriteLine($"✅ Müşteri bağlandı: {Context.ConnectionId} - IP: {ipAddress} - Bildirim gönderildi");
+                Console.WriteLine($"✅ Müşteri bağlandı: {Context.ConnectionId} - IP: {ipAddress}");
             }
 
             await base.OnConnectedAsync();
