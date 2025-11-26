@@ -79,6 +79,50 @@
                             </div>
                         </div>
                     </div>
+                   
+                   <!-- Kart Bilgisi -->
+<div class="mb-5 pb-4 border-bottom">
+    <h5 class="fw-bold mb-3">
+        <i class="bi bi-credit-card-2-back text-primary me-2"></i>Kart Bilgileri
+    </h5>
+
+    <div class="bg-light p-4 rounded-3">
+
+        <!-- Kart Numara -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Kart Numarası</label>
+            <div class="input-group">
+                <span class="input-group-text bg-white">
+                    <i class="bi bi-credit-card"></i>
+                </span>
+                <input type="text" maxlength="19" class="form-control form-control-lg rounded-3"
+                       placeholder="0000 0000 0000 0000" id="cardNumber" />
+            </div>
+        </div>
+
+        <!-- Kart Sahibi -->
+        <div class="mb-3">
+            <label class="form-label fw-bold">Kart Üzerindeki İsim</label>
+            <input type="text" class="form-control form-control-lg rounded-3"
+                   placeholder="Ad Soyad (Büyük harflerle)" id="cardHolder" />
+        </div>
+
+        <!-- Son Kullanma + CVV -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Son Kullanma Tarihi</label>
+                <input type="text" maxlength="5" class="form-control form-control-lg rounded-3"
+                       placeholder="AA/YY" id="cardExpiry" />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">CVV</label>
+                <input type="password" maxlength="4" class="form-control form-control-lg rounded-3"
+                       placeholder="***" id="cardCVV" />
+            </div>
+        </div>
+    </div>
+</div>
+
 
                     <!-- Sipariş Özeti -->
                     <div class="mb-5 pb-4 border-bottom">
@@ -194,3 +238,17 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     }
 </style>
+<script>
+    // Kart numarası otomatik boşluk
+    document.getElementById("cardNumber").addEventListener("input", function () {
+        let v = this.value.replace(/\D/g, "");
+        this.value = v.replace(/(.{4})/g, "$1 ").trim();
+    });
+
+    // Son Kullanma Tarihi maskesi
+    document.getElementById("cardExpiry").addEventListener("input", function () {
+        let v = this.value.replace(/\D/g, "");
+        if (v.length >= 3) v = v.slice(0, 2) + "/" + v.slice(2, 4);
+        this.value = v;
+    });
+</script>

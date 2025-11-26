@@ -1,0 +1,81 @@
+@model login.Models.User
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                    <h3 class="mb-0">
+                        <i class="bi bi-person-circle me-2"></i>Profil Bilgilerim
+                    </h3>
+                    <p class="mb-0 small opacity-75">Kişisel bilgilerinizi buradan güncelleyebilirsiniz</p>
+                </div>
+
+                <form method="post" class="p-4">
+
+                    <!-- Ad Soyad -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Ad Soyad</label>
+                        <input type="text" class="form-control form-control-lg rounded-3" 
+                               name="FullName" value="@Model.Username" placeholder="Adınız Soyadınız" required />
+                    </div>
+
+                    <!-- Telefon -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Telefon Numarası</label>
+                        <input type="tel" class="form-control form-control-lg rounded-3"
+                               name="Phone" value="@Model.PhoneNumber" placeholder="0(5XX) XXX XX XX" required />
+                    </div>
+
+                    <!-- TC Kimlik -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">TC Kimlik No</label>
+                        <input type="text" maxlength="11" class="form-control form-control-lg rounded-3"
+                               name="TCKN" value="@Model" placeholder="11 haneli kimlik numarası" required />
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">E-posta</label>
+                        <input type="email" class="form-control form-control-lg rounded-3"
+                               name="Email" value="@Model.Email" placeholder="mail@example.com" required />
+                    </div>
+
+                    <!-- Doğum Tarihi -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Doğum Tarihi</label>
+                        <input type="date" class="form-control form-control-lg rounded-3"
+                               name="BirthDate" value="@Model.BirthDate?.ToString("yyyy-MM-dd")" required />
+                    </div>
+
+                    <!-- Adres -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Adres</label>
+                        <textarea class="form-control form-control-lg rounded-3" rows="3"
+                                  name="Address" placeholder="Açık adresiniz">@Model.Address</textarea>
+                    </div>
+
+                    <!-- Kaydet Butonu -->
+                    <div class="d-grid">
+                        <button class="btn btn-primary btn-lg rounded-3">
+                            <i class="bi bi-check2-circle me-2"></i>Bilgilerimi Kaydet
+                        </button>
+                    </div>
+
+                </form>
+
+                <div class="card-footer bg-light p-3 text-center rounded-bottom-4 text-muted small">
+                    Son güncelleme: <strong>@DateTime.Now.ToString("dd.MM.yyyy")</strong>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus {
+        border-color: #6c63ff;
+        box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+    }
+</style>

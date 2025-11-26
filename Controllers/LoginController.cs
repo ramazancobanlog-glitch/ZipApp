@@ -25,7 +25,10 @@ namespace login.Controllers
         {
             return View();
         }
-
+    public IActionResult Profile()
+        {
+            return View();
+        }
         [HttpPost]
         public async Task<IActionResult> Index(string username, string password)
         {

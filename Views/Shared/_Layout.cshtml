@@ -37,7 +37,14 @@
             color: #FF6B35 !important;
             letter-spacing: -0.5px;
         }
-
+        .cart-badge{
+         position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            color: #FF6B35 !important;
+            font-size: 1.8rem;
+        
+        }
         .nav-menu-item {
             color: #333 !important;
             font-weight: 600;
@@ -305,15 +312,16 @@
                         </div>
 
                         <!-- Cart Badge -->
-                        <a  class="cart-icon-badge" asp-controller="Cart" asp-action="Index" title="Sepete Git">
-                            @await Component.InvokeAsync("CartBadge")
+                        <a  class="bag bi-bag cart-badge" asp-controller="Cart" asp-action="Index" title="Sepete Git">
+                           
                         </a>
-
+                                
                         <!-- User Menu -->
                         <div class="dropdown">
                             <button class="btn btn-light rounded-circle p-2" type="button" data-bs-toggle="dropdown" style="border: 1px solid #DDD; color: #FF6B35;">
                                 <i class="bi bi-person-circle" style="font-size: 1.5rem;"></i>
                             </button>
+                        
                             @{var username=Context.Session.GetString("Username");}
                             @{var isAdmin = Context.Session.GetString("IsAdmin") == "True";}
                             @if (!string.IsNullOrEmpty(username))

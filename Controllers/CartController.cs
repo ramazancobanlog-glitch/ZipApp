@@ -230,7 +230,7 @@ namespace login.Controllers
 		{items}
 	</div>
 	
-	<h3>Toplam Tutar: {TurkishLiraFormatting.Format(total)}</h3>
+	<h3> Tutar: {TurkishLiraFormatting.Format(total)}</h3>
 	
 	<p>Siparişiniz için teşekkür ederiz!</p>
 	<p>Bizi tercih ettiğiniz için teşekkürler.</p>
@@ -289,7 +289,7 @@ namespace login.Controllers
 								var emailBody = BuildOrderConfirmationEmail(cart);
 								await _emailService.SendEmailAsync(
 									user.Email,
-									"Siparişiniz Onaylandı",
+									"Siparişiniz Onaylandı", 
 									emailBody
 								);
 							}
